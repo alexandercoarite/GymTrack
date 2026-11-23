@@ -1,0 +1,148 @@
+@page "/app/progreso"
+@inject IProgressService ProgressSvc
+
+<PageTitle>Mi progreso · GymTrack</PageTitle>
+
+<PageHeader Title="Mi progreso" Subtitle="Cada registro conserva su fecha: el historial anterior nunca se reemplaza." />
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+<div class="grid gap-6 lg:grid-cols-3">
+    <section class="card lg:col-span-1">
+        <h2 class="font-bold">Nuevo registro</h2>
+        <EditForm Model="model" OnValidSubmit="Add" class="mt-4 space-y-3">
+            <DataAnnotationsValidator />
+            <div>
+                <label for="fecha" class="label-gym">Fecha</label>
+                <InputDate id="fecha" @bind-Value="model.Fecha" class="input-gym" />
+            </div>
+            <div>
+                <label for="peso" class="label-gym">Peso corporal (kg)</label>
+                <InputNumber id="peso" @bind-Value="model.PesoKg" class="input-gym" step="0.1" />
+                <ValidationMessage For="() => model.PesoKg" />
+            </div>
+            <details class="rounded-xl border border-gym-border p-3">
+                <summary class="cursor-pointer text-sm font-semibold">Medidas opcionales (cm)</summary>
+                <div class="mt-3 grid grid-cols-2 gap-3">
+                    <div><label for="cintura" class="label-gym">Cintura</label><InputNumber id="cintura" @bind-Value="model.CinturaCm" class="input-gym" step="0.1" /></div>
+                    <div><label for="pecho" class="label-gym">Pecho</label><InputNumber id="pecho" @bind-Value="model.PechoCm" class="input-gym" step="0.1" /></div>
+                    <div><label for="cadera" class="label-gym">Cadera</label><InputNumber id="cadera" @bind-Value="model.CaderaCm" class="input-gym" step="0.1" /></div>
+                    <div><label for="brazo" class="label-gym">Brazo</label><InputNumber id="brazo" @bind-Value="model.BrazoCm" class="input-gym" step="0.1" /></div>
+                    <div class="col-span-2"><label for="muslo" class="label-gym">Muslo</label><InputNumber id="muslo" @bind-Value="model.MusloCm" class="input-gym" step="0.1" /></div>
+                </div>
+                <ValidationSummary />
+            </details>
+            <div>
+                <label for="logro" class="label-gym">Objetivo alcanzado (opcional)</label>
+                <InputText id="logro" @bind-Value="model.ObjetivoAlcanzado" class="input-gym" placeholder="Ej.: Primera semana completa" />
+            </div>
+            <div>
+                <label for="obs" class="label-gym">Observaciones (opcional)</label>
+                <InputTextArea id="obs" @bind-Value="model.Observaciones" rows="2" class="input-gym" />
+            </div>
+            <button type="submit" class="btn-primary w-full" disabled="@Busy">Guardar registro</button>
+        </EditForm>
+    </section>
+
+    <section class="card lg:col-span-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="font-bold">Evolución</h2>
+            <select class="input-gym max-w-48" @bind="metric" aria-label="Métrica del gráfico">
+                @foreach (var m in metrics.Keys) { <option value="@m">@m</option> }
+            </select>
+        </div>
+        <div class="mt-4">
+            <LineChart Points="ChartPoints" Unit="@(metric == "Peso" ? "kg" : "cm")" AriaLabel="@($"Evolución de {metric.ToLower()}")" />
+        </div>
+        @if (records.Count >= 2)
+        {
+            var diff = records[^1].PesoKg - records[0].PesoKg;
+            <p class="mt-3 text-sm text-gray-300">
+                Cambio de peso desde tu primer registro:
+                <strong class="@(diff <= 0 ? "text-gym-accent" : "text-white")">@(diff > 0 ? "+" : "")@diff.ToString("0.#", CultureInfo.InvariantCulture) kg</strong>
+            </p>
+        }
+    </section>
+</div>
+
+<section class="card mt-6">
+    <h2 class="font-bold">Historial</h2>
+    @if (records.Count == 0)
+    {
+        <p class="mt-3 text-sm text-gym-muted">Aún no tienes registros.</p>
+    }
+    else
+    {
+        <div class="mt-3 overflow-x-auto">
+            <table class="table-gym">
+                <thead>
+                    <tr><th>Fecha</th><th>Peso</th><th>Cintura</th><th>Pecho</th><th>Cadera</th><th>Brazo</th><th>Muslo</th><th>Notas</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in records.OrderByDescending(x => x.Fecha).ThenByDescending(x => x.Id))
+                    {
+                        <tr>
+                            <td>@r.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@r.PesoKg.ToString("0.#", CultureInfo.InvariantCulture) kg</td>
+                            <td>@Cm(r.CinturaCm)</td><td>@Cm(r.PechoCm)</td><td>@Cm(r.CaderaCm)</td><td>@Cm(r.BrazoCm)</td><td>@Cm(r.MusloCm)</td>
+                            <td class="max-w-56 text-xs text-gray-300">@r.ObjetivoAlcanzado @r.Observaciones</td>
+                            <td><button type="button" class="btn-danger btn-sm" @onclick="() => toDelete = r">Eliminar</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<ConfirmDialog Visible="toDelete != null" Title="Eliminar registro" Message="¿Eliminar este registro de progreso?"
+               OnConfirm="Delete" OnCancel="() => toDelete = null" />
+
+@code {
+    private ProgressModel model = new();
+    private List<ProgressDto> records = new();
+    private ProgressDto? toDelete;
+    private string metric = "Peso";
+
+    private readonly Dictionary<string, Func<ProgressDto, double?>> metrics = new()
+    {
+        ["Peso"] = r => r.PesoKg,
+        ["Cintura"] = r => r.CinturaCm,
+        ["Pecho"] = r => r.PechoCm,
+        ["Cadera"] = r => r.CaderaCm,
+        ["Brazo"] = r => r.BrazoCm,
+        ["Muslo"] = r => r.MusloCm,
+    };
+
+    private List<(string Label, double Value)> ChartPoints =>
+        records.Select(r => (Label: r.Fecha.ToString("dd/MM/yy"), Value: metrics[metric](r)))
+               .Where(p => p.Value.HasValue)
+               .Select(p => (p.Label, p.Value!.Value))
+               .ToList();
+
+    private static string Cm(double? v) => v.HasValue ? $"{v.Value.ToString("0.#", CultureInfo.InvariantCulture)} cm" : "—";
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load() => await Safe(async () => records = (await ProgressSvc.ListAsync()).ToList(), keepMessages: true);
+
+    private async Task Add()
+    {
+        var saved = await Safe(async () => await ProgressSvc.AddAsync(model), "Registro guardado.");
+        if (saved)
+        {
+            model = new ProgressModel();
+            await Load();
+            Ok = "Registro guardado.";
+        }
+    }
+
+    private async Task Delete()
+    {
+        var target = toDelete;
+        toDelete = null;
+        if (target == null) return;
+        await Safe(async () => await ProgressSvc.DeleteAsync(target.Id), "Registro eliminado.");
+        await Load();
+    }
+}

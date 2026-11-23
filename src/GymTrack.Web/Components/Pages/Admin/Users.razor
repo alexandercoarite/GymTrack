@@ -1,0 +1,66 @@
+@page "/admin/usuarios"
+@inject IUserAdminService UserSvc
+
+<PageTitle>Usuarios · GymTrack</PageTitle>
+
+<PageHeader Title="Gestión de usuarios" Subtitle="Consulta cuentas, actívalas o desactívalas." />
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+<div class="card mb-4">
+    <label for="buscar" class="label-gym">Buscar por nombre, usuario o correo</label>
+    <input id="buscar" class="input-gym" placeholder="Escribe para buscar…" @bind="text" @bind:event="oninput" @bind:after="Load" />
+</div>
+
+<div class="card overflow-x-auto">
+    @if (items == null)
+    {
+        <p class="text-gym-muted">Cargando…</p>
+    }
+    else if (items.Count == 0)
+    {
+        <p class="text-sm text-gym-muted">No se encontraron usuarios.</p>
+    }
+    else
+    {
+        <table class="table-gym">
+            <thead><tr><th>Nombre</th><th>Correo</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Registro</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var u in items)
+                {
+                    <tr>
+                        <td class="font-semibold">@u.NombreCompleto</td>
+                        <td>@u.Email</td>
+                        <td>@u.UserName</td>
+                        <td><span class="badge @(u.Rol == AppRoles.Admin ? "badge-warn" : "badge-neutral")">@u.Rol</span></td>
+                        <td><span class="badge @(u.Activo ? "badge-ok" : "badge-bad")">@(u.Activo ? "Activa" : "Desactivada")</span></td>
+                        <td>@u.FechaRegistro.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <div class="flex justify-end gap-1">
+                                <a href="/admin/usuarios/@u.Id" class="btn-ghost btn-sm">Ver perfil</a>
+                                <button type="button" class="@(u.Activo ? "btn-danger" : "btn-ghost") btn-sm" @onclick="() => Toggle(u)">@(u.Activo ? "Desactivar" : "Activar")</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private string? text;
+    private IReadOnlyList<UserListItem>? items;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load() =>
+        await Safe(async () => items = await UserSvc.SearchAsync(text), keepMessages: true);
+
+    private async Task Toggle(UserListItem user)
+    {
+        await Safe(async () => await UserSvc.SetActiveAsync(user.Id, !user.Activo),
+            user.Activo ? "Cuenta desactivada." : "Cuenta activada.");
+        await Load();
+    }
+}

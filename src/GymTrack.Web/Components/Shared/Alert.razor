@@ -1,0 +1,18 @@
+@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <div role="alert" class="@Css">@Message</div>
+}
+
+@code {
+    /// <summary>success, error, warning o info.</summary>
+    [Parameter] public string Kind { get; set; } = "info";
+    [Parameter] public string? Message { get; set; }
+
+    private string Css => "mb-4 rounded-xl border px-4 py-3 text-sm " + Kind switch
+    {
+        "success" => "border-green-500/40 bg-green-500/10 text-green-300",
+        "error" => "border-red-500/40 bg-red-500/10 text-red-300",
+        "warning" => "border-amber-500/40 bg-amber-500/10 text-amber-300",
+        _ => "border-sky-500/40 bg-sky-500/10 text-sky-300"
+    };
+}

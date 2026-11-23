@@ -1,0 +1,136 @@
+@page "/app/perfil"
+@inject IProfileService ProfileService
+@inject IBodyAssessmentService Assessments
+@inject IProgressService ProgressSvc
+
+<PageTitle>Mi perfil · GymTrack</PageTitle>
+
+<PageHeader Title="Mi perfil" Subtitle="Tus datos personales y tu privacidad." />
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+@if (model == null)
+{
+    <p class="text-gym-muted">Cargando…</p>
+}
+else
+{
+    <div class="grid gap-6 lg:grid-cols-2">
+        <section class="card">
+            <h2 class="font-bold">Datos personales</h2>
+            <EditForm Model="model" OnValidSubmit="SaveProfile" class="mt-4 space-y-3">
+                <DataAnnotationsValidator />
+                <div class="grid gap-3 md:grid-cols-2">
+                    <div><label class="label-gym">Correo</label><input class="input-gym opacity-70" value="@model.Email" disabled /></div>
+                    <div><label class="label-gym">Usuario</label><input class="input-gym opacity-70" value="@model.UserName" disabled /></div>
+                </div>
+                <div class="grid gap-3 md:grid-cols-2">
+                    <div>
+                        <label for="nombre" class="label-gym">Nombre</label>
+                        <InputText id="nombre" @bind-Value="model.Nombre" class="input-gym" />
+                        <ValidationMessage For="() => model.Nombre" />
+                    </div>
+                    <div>
+                        <label for="apellido" class="label-gym">Apellido</label>
+                        <InputText id="apellido" @bind-Value="model.Apellido" class="input-gym" />
+                        <ValidationMessage For="() => model.Apellido" />
+                    </div>
+                </div>
+                <div class="grid gap-3 md:grid-cols-2">
+                    <div>
+                        <label for="tel" class="label-gym">Teléfono</label>
+                        <InputText id="tel" @bind-Value="model.Telefono" class="input-gym" />
+                        <ValidationMessage For="() => model.Telefono" />
+                    </div>
+                    <div>
+                        <label for="nac" class="label-gym">Fecha de nacimiento</label>
+                        <InputDate id="nac" @bind-Value="model.FechaNacimiento" class="input-gym" />
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" disabled="@Busy">Guardar cambios</button>
+            </EditForm>
+        </section>
+
+        <section class="card">
+            <h2 class="font-bold">Cambiar contraseña</h2>
+            <EditForm Model="pwd" OnValidSubmit="ChangePassword" class="mt-4 space-y-3">
+                <DataAnnotationsValidator />
+                <div>
+                    <label for="actual" class="label-gym">Contraseña actual</label>
+                    <InputText id="actual" type="password" @bind-Value="pwd.Actual" class="input-gym" autocomplete="current-password" />
+                    <ValidationMessage For="() => pwd.Actual" />
+                </div>
+                <div>
+                    <label for="nueva" class="label-gym">Contraseña nueva</label>
+                    <InputText id="nueva" type="password" @bind-Value="pwd.Nueva" class="input-gym" autocomplete="new-password" />
+                    <ValidationMessage For="() => pwd.Nueva" />
+                </div>
+                <div>
+                    <label for="confirmar" class="label-gym">Confirmar contraseña nueva</label>
+                    <InputText id="confirmar" type="password" @bind-Value="pwd.Confirmar" class="input-gym" autocomplete="new-password" />
+                    <ValidationMessage For="() => pwd.Confirmar" />
+                </div>
+                <p class="hint-gym">Por seguridad, al cambiar la contraseña tus sesiones abiertas se cerrarán y tendrás que iniciar sesión de nuevo.</p>
+                <button type="submit" class="btn-primary" disabled="@Busy">Cambiar contraseña</button>
+            </EditForm>
+        </section>
+    </div>
+
+    <section class="card mt-6">
+        <h2 class="font-bold">Privacidad y datos</h2>
+        <p class="mt-1 text-sm text-gray-300">Puedes eliminar tus datos sensibles cuando quieras. Estas acciones son permanentes.</p>
+        <div class="mt-4 flex flex-wrap gap-3">
+            <button type="button" class="btn-danger" @onclick="() => confirm = PendingAction.Photos">Eliminar evaluaciones y fotografías</button>
+            <button type="button" class="btn-danger" @onclick="() => confirm = PendingAction.Progress">Eliminar mi historial de progreso</button>
+        </div>
+        <p class="hint-gym">Para eliminar tu cuenta completa, solicítalo al personal del gimnasio.</p>
+    </section>
+}
+
+<ConfirmDialog Visible="confirm != PendingAction.None" Title="Confirmar eliminación"
+               Message="@(confirm == PendingAction.Photos ? "Se eliminarán todas tus evaluaciones corporales y fotografías." : "Se eliminará todo tu historial de peso y medidas.")"
+               ConfirmText="Eliminar" OnConfirm="Confirm" OnCancel="() => confirm = PendingAction.None" />
+
+@code {
+    private enum PendingAction { None, Photos, Progress }
+
+    private ProfileModel? model;
+    private readonly PasswordModel pwd = new();
+    private PendingAction confirm = PendingAction.None;
+
+    protected override async Task OnInitializedAsync() =>
+        await Safe(async () => model = await ProfileService.GetAsync());
+
+    private async Task SaveProfile() =>
+        await Safe(async () => await ProfileService.UpdateAsync(model!), "Datos actualizados.");
+
+    private async Task ChangePassword()
+    {
+        var done = await Safe(async () => await ProfileService.ChangePasswordAsync(pwd.Actual, pwd.Nueva),
+            "Contraseña actualizada. Por seguridad, tu sesión se cerrará en breve.");
+        if (done) { pwd.Actual = pwd.Nueva = pwd.Confirmar = string.Empty; }
+    }
+
+    private async Task Confirm()
+    {
+        var action = confirm;
+        confirm = PendingAction.None;
+        if (action == PendingAction.Photos)
+            await Safe(async () => await Assessments.DeleteAllAsync(), "Se eliminaron tus evaluaciones y fotografías.");
+        else if (action == PendingAction.Progress)
+            await Safe(async () => await ProgressSvc.DeleteAllAsync(), "Se eliminó tu historial de progreso.");
+    }
+
+    private sealed class PasswordModel
+    {
+        [Required(ErrorMessage = "Escribe tu contraseña actual.")]
+        public string Actual { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Escribe la contraseña nueva.")]
+        public string Nueva { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Confirma la contraseña nueva.")]
+        [Compare(nameof(Nueva), ErrorMessage = "Las contraseñas no coinciden.")]
+        public string Confirmar { get; set; } = string.Empty;
+    }
+}

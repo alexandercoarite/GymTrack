@@ -1,0 +1,218 @@
+@page "/"
+@inject IMachineService Machines
+@inject IOpeningHourService Hours
+@inject IOptions<GymInfo> Info
+
+<PageTitle>@Info.Value.Name · Gestión inteligente para tu gimnasio</PageTitle>
+
+<!-- Sección principal -->
+<section class="relative overflow-hidden border-b border-gym-border bg-gradient-to-br from-gym-black via-gym-dark to-black">
+    <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
+        <div class="fade-in">
+            <p class="mb-3 inline-block rounded-full border border-gym-accent/40 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gym-accent">Entrena con datos</p>
+            <h1 class="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
+                Tu progreso, <span class="text-gym-accent">medido</span> y guiado.
+            </h1>
+            <p class="mt-5 max-w-xl text-lg text-gray-300">
+                @Info.Value.Name combina un cuestionario personalizado, rutinas basadas en las máquinas que realmente tenemos
+                y el seguimiento de tu evolución en un solo lugar.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a href="/cuenta/registro" class="btn-primary">Crear mi cuenta</a>
+                <a href="/cuenta/iniciar-sesion" class="btn-ghost">Iniciar sesión</a>
+            </div>
+            @if (status != null)
+            {
+                <p class="mt-6 flex items-center gap-2 text-sm text-gray-300">
+                    <span class="inline-block h-2.5 w-2.5 rounded-full @(status.AbiertoAhora ? "bg-gym-accent" : "bg-gym-danger")"></span>
+                    @status.Mensaje
+                </p>
+            }
+        </div>
+
+        <div class="fade-in flex justify-center" aria-hidden="true">
+            <svg viewBox="0 0 320 220" class="w-full max-w-md" fill="none" stroke="#39ff14" stroke-width="6" stroke-linecap="round">
+                <rect x="30" y="80" width="22" height="60" rx="5" fill="#1a1f26" />
+                <rect x="58" y="62" width="26" height="96" rx="6" fill="#1a1f26" />
+                <rect x="236" y="62" width="26" height="96" rx="6" fill="#1a1f26" />
+                <rect x="268" y="80" width="22" height="60" rx="5" fill="#1a1f26" />
+                <line x1="84" y1="110" x2="236" y2="110" />
+                <circle cx="160" cy="110" r="10" fill="#39ff14" stroke="none" />
+                <path d="M30 190 H290" stroke="#2a313a" stroke-width="3" />
+            </svg>
+        </div>
+    </div>
+</section>
+
+<!-- Servicios -->
+<section id="servicios" class="mx-auto max-w-6xl px-4 py-16">
+    <h2 class="text-3xl font-extrabold">Servicios del gimnasio</h2>
+    <p class="mt-2 text-gym-muted">Todo lo que necesitas para entrenar con constancia.</p>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach (var s in services)
+        {
+            <div class="card fade-in">
+                <p class="text-3xl" aria-hidden="true">@s.Icon</p>
+                <h3 class="mt-3 font-bold">@s.Title</h3>
+                <p class="mt-1 text-sm text-gray-300">@s.Text</p>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Beneficios -->
+<section class="border-y border-gym-border bg-gym-dark">
+    <div class="mx-auto max-w-6xl px-4 py-16">
+        <h2 class="text-3xl font-extrabold">Beneficios de usar la plataforma</h2>
+        <div class="mt-8 grid gap-4 md:grid-cols-3">
+            @foreach (var b in benefits)
+            {
+                <div class="rounded-2xl border border-gym-border p-5">
+                    <h3 class="font-bold text-gym-accent">@b.Title</h3>
+                    <p class="mt-2 text-sm text-gray-300">@b.Text</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Máquinas -->
+<section id="maquinas" class="mx-auto max-w-6xl px-4 py-16">
+    <h2 class="text-3xl font-extrabold">Nuestras máquinas</h2>
+    <p class="mt-2 text-gym-muted">Consulta el equipo disponible y su estado actual.</p>
+    @if (machines == null)
+    {
+        <p class="mt-6 text-gym-muted">Cargando máquinas…</p>
+    }
+    else if (machines.Count == 0)
+    {
+        <p class="mt-6 text-gym-muted">Pronto publicaremos el catálogo de máquinas.</p>
+    }
+    else
+    {
+        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var m in machines)
+            {
+                <MachineCard Machine="m" OnSelect="Select" />
+            }
+        </div>
+    }
+</section>
+<MachineDetail Machine="selected" OnClose="Close" />
+
+<!-- Horarios -->
+<section id="horarios" class="border-y border-gym-border bg-gym-dark">
+    <div class="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-2">
+        <div>
+            <h2 class="text-3xl font-extrabold">Horarios de atención</h2>
+            <div class="card mt-6">
+                @if (week == null)
+                {
+                    <p class="text-gym-muted">Cargando…</p>
+                }
+                else
+                {
+                    <table class="table-gym">
+                        <tbody>
+                            @foreach (var d in week)
+                            {
+                                <tr>
+                                    <td class="font-semibold">@DayLabels.Of(d.Dia)</td>
+                                    <td class="text-right">
+                                        @if (d.Abierto && d.Apertura != null && d.Cierre != null)
+                                        {
+                                            @($"{d.Apertura:HH\\:mm} – {d.Cierre:HH\\:mm}")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-gym-muted">Cerrado</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+        <div>
+            <h3 class="text-xl font-bold">Horarios especiales</h3>
+            @if (special == null || special.Count == 0)
+            {
+                <p class="mt-4 text-sm text-gym-muted">No hay cierres ni horarios especiales programados.</p>
+            }
+            else
+            {
+                <ul class="mt-4 space-y-3">
+                    @foreach (var s in special)
+                    {
+                        <li class="card py-3">
+                            <p class="font-semibold">@s.Fecha.ToString("dddd d 'de' MMMM", CultureInfo.GetCultureInfo("es"))</p>
+                            <p class="text-sm text-gray-300">
+                                @s.Descripcion ·
+                                @if (s.Abierto && s.Apertura != null && s.Cierre != null)
+                                {
+                                    @($"{s.Apertura:HH\\:mm} – {s.Cierre:HH\\:mm}")
+                                }
+                                else
+                                {
+                                    <span class="text-gym-danger">Cerrado</span>
+                                }
+                            </p>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Contacto -->
+<section id="contacto" class="mx-auto max-w-6xl px-4 py-16">
+    <h2 class="text-3xl font-extrabold">Contacto y ubicación</h2>
+    <div class="mt-8 grid gap-4 md:grid-cols-3">
+        <div class="card"><p class="text-xs uppercase tracking-wide text-gym-muted">Dirección</p><p class="mt-1">@Info.Value.Address</p></div>
+        <div class="card"><p class="text-xs uppercase tracking-wide text-gym-muted">Teléfono</p><p class="mt-1">@Info.Value.Phone</p></div>
+        <div class="card"><p class="text-xs uppercase tracking-wide text-gym-muted">Correo</p><p class="mt-1">@Info.Value.Email</p></div>
+    </div>
+</section>
+
+@code {
+    private IReadOnlyList<MachineDto>? machines;
+    private IReadOnlyList<OpeningHourModel>? week;
+    private IReadOnlyList<SpecialOpeningHourModel>? special;
+    private GymStatusDto? status;
+    private MachineDto? selected;
+
+    private record Item(string Icon, string Title, string Text);
+
+    private static readonly Item[] services =
+    {
+        new("🏋️", "Sala de musculación", "Máquinas guiadas y peso libre para todos los niveles."),
+        new("🏃", "Zona de cardio", "Cintas, bicicletas y remo para mejorar tu resistencia."),
+        new("📋", "Rutinas personalizadas", "Planes según tu objetivo, tu nivel y el equipo disponible."),
+        new("📈", "Seguimiento del progreso", "Registra tu peso y medidas y mira tu evolución en gráficos."),
+        new("📸", "Evaluación corporal", "Fotografías opcionales y privadas para comparar tu avance."),
+        new("🕒", "Horarios claros", "Consulta en línea cuándo abrimos y cualquier cierre especial."),
+    };
+
+    private static readonly Benefit[] benefits =
+    {
+        new("Entrenamiento a tu medida", "Responde un cuestionario breve y recibe una rutina adaptada a tus metas."),
+        new("Basado en equipo real", "Las rutinas solo incluyen máquinas que están disponibles en el gimnasio."),
+        new("Tu privacidad primero", "Las fotografías son opcionales, privadas y puedes eliminarlas cuando quieras."),
+    };
+
+    private sealed record Benefit(string Title, string Text);
+
+    protected override async Task OnInitializedAsync()
+    {
+        machines = await Machines.SearchAsync();
+        week = await Hours.GetWeekAsync();
+        special = await Hours.GetSpecialAsync(soloProximos: true);
+        status = await Hours.GetTodayStatusAsync();
+    }
+
+    private void Select(MachineDto m) => selected = m;
+    private void Close() => selected = null;
+}

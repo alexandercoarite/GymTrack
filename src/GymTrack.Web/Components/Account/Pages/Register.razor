@@ -1,0 +1,145 @@
+@page "/cuenta/registro"
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager Nav
+@inject ILogger<Register> Logger
+
+<PageTitle>Crear cuenta · GymTrack</PageTitle>
+
+<div class="mx-auto max-w-xl px-4 py-12">
+    <div class="card">
+        <h1 class="text-2xl font-extrabold">Crear cuenta</h1>
+        <p class="mb-5 mt-1 text-sm text-gym-muted">Regístrate para recibir rutinas personalizadas y seguir tu progreso.</p>
+
+        <Alert Kind="error" Message="@error" />
+
+        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register" class="space-y-4">
+            <DataAnnotationsValidator />
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label for="nombre" class="label-gym">Nombre</label>
+                    <InputText id="nombre" @bind-Value="Input.Nombre" class="input-gym" autocomplete="given-name" />
+                    <ValidationMessage For="() => Input.Nombre" />
+                </div>
+                <div>
+                    <label for="apellido" class="label-gym">Apellido</label>
+                    <InputText id="apellido" @bind-Value="Input.Apellido" class="input-gym" autocomplete="family-name" />
+                    <ValidationMessage For="() => Input.Apellido" />
+                </div>
+            </div>
+            <div>
+                <label for="email" class="label-gym">Correo electrónico</label>
+                <InputText id="email" type="email" @bind-Value="Input.Email" class="input-gym" autocomplete="email" />
+                <ValidationMessage For="() => Input.Email" />
+            </div>
+            <div>
+                <label for="usuario" class="label-gym">Nombre de usuario</label>
+                <InputText id="usuario" @bind-Value="Input.UserName" class="input-gym" autocomplete="username" />
+                <ValidationMessage For="() => Input.UserName" />
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label for="nacimiento" class="label-gym">Fecha de nacimiento (opcional)</label>
+                    <InputDate id="nacimiento" @bind-Value="Input.FechaNacimiento" class="input-gym" />
+                    <p class="hint-gym">Nos ayuda a adaptar las recomendaciones.</p>
+                    <ValidationMessage For="() => Input.FechaNacimiento" />
+                </div>
+                <div>
+                    <label for="telefono" class="label-gym">Teléfono (opcional)</label>
+                    <InputText id="telefono" type="tel" @bind-Value="Input.Telefono" class="input-gym" autocomplete="tel" />
+                    <ValidationMessage For="() => Input.Telefono" />
+                </div>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label for="password" class="label-gym">Contraseña</label>
+                    <InputText id="password" type="password" @bind-Value="Input.Password" class="input-gym" autocomplete="new-password" />
+                    <ValidationMessage For="() => Input.Password" />
+                </div>
+                <div>
+                    <label for="confirmar" class="label-gym">Confirmar contraseña</label>
+                    <InputText id="confirmar" type="password" @bind-Value="Input.ConfirmarPassword" class="input-gym" autocomplete="new-password" />
+                    <ValidationMessage For="() => Input.ConfirmarPassword" />
+                </div>
+            </div>
+            <p class="hint-gym">Mínimo 8 caracteres, con mayúscula, minúscula y número.</p>
+            <button type="submit" class="btn-primary w-full">Crear cuenta</button>
+        </EditForm>
+
+        <p class="mt-5 text-sm text-gym-muted">¿Ya tienes cuenta? <a href="/cuenta/iniciar-sesion" class="text-gym-accent hover:underline">Inicia sesión</a></p>
+    </div>
+</div>
+
+@code {
+    private string? error;
+
+    [SupplyParameterFromForm] private RegisterModel Input { get; set; } = default!;
+
+    protected override void OnInitialized() => Input ??= new();
+
+    private async Task RegisterUser()
+    {
+        var user = new ApplicationUser
+        {
+            UserName = Input.UserName.Trim(),
+            Email = Input.Email.Trim(),
+            Nombre = Input.Nombre.Trim(),
+            Apellido = Input.Apellido.Trim(),
+            FechaNacimiento = Input.FechaNacimiento,
+            PhoneNumber = string.IsNullOrWhiteSpace(Input.Telefono) ? null : Input.Telefono.Trim(),
+            FechaRegistro = DateTime.UtcNow,
+            Activo = true
+        };
+
+        var result = await UserManager.CreateAsync(user, Input.Password);
+        if (!result.Succeeded)
+        {
+            error = string.Join(" ", result.Errors.Select(e => e.Description));
+            return;
+        }
+
+        await UserManager.AddToRoleAsync(user, AppRoles.Client);
+        Logger.LogInformation("Nuevo cliente registrado: {UserId}", user.Id);
+        await SignInManager.SignInAsync(user, isPersistent: false);
+        Nav.NavigateTo("/app/cuestionario", forceLoad: true);
+    }
+
+    private sealed class RegisterModel : IValidatableObject
+    {
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [StringLength(80, ErrorMessage = "El nombre no puede superar 80 caracteres.")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El apellido es obligatorio.")]
+        [StringLength(80, ErrorMessage = "El apellido no puede superar 80 caracteres.")]
+        public string Apellido { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
+        [EmailAddress(ErrorMessage = "El correo electrónico no es válido.")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
+        [StringLength(30, MinimumLength = 3, ErrorMessage = "El usuario debe tener entre 3 y 30 caracteres.")]
+        [RegularExpression(@"^[A-Za-z0-9._\-]+$", ErrorMessage = "Solo letras, números, punto, guion y guion bajo.")]
+        public string UserName { get; set; } = string.Empty;
+
+        public DateTime? FechaNacimiento { get; set; }
+
+        [Phone(ErrorMessage = "El teléfono no es válido.")]
+        [StringLength(30, ErrorMessage = "El teléfono no puede superar 30 caracteres.")]
+        public string? Telefono { get; set; }
+
+        [Required(ErrorMessage = "La contraseña es obligatoria.")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Confirma tu contraseña.")]
+        [Compare(nameof(Password), ErrorMessage = "Las contraseñas no coinciden.")]
+        public string ConfirmarPassword { get; set; } = string.Empty;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (FechaNacimiento is { } d && (d.Date > DateTime.Today || d.Date < DateTime.Today.AddYears(-120)))
+                yield return new ValidationResult("La fecha de nacimiento no es válida.", new[] { nameof(FechaNacimiento) });
+        }
+    }
+}

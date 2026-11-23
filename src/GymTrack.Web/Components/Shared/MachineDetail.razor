@@ -1,0 +1,33 @@
+<Modal Visible="Machine != null" Title="@(Machine?.Nombre ?? string.Empty)" OnClose="OnClose" Wide="true">
+    @if (Machine != null)
+    {
+        <div class="grid gap-4 md:grid-cols-2">
+            <div class="flex h-56 items-center justify-center overflow-hidden rounded-xl bg-gym-dark">
+                @if (!string.IsNullOrWhiteSpace(Machine.ImagenRuta))
+                {
+                    <img src="@Machine.ImagenRuta" alt="@Machine.Nombre" class="h-full w-full object-cover" />
+                }
+                else
+                {
+                    <span class="text-7xl" aria-hidden="true">🏋️</span>
+                }
+            </div>
+            <div class="space-y-2 text-sm">
+                <p><StatusBadge Status="Machine.Estado" /></p>
+                <p><span class="text-gym-muted">Categoría:</span> @Machine.Categoria</p>
+                <p><span class="text-gym-muted">Grupo muscular:</span> @Machine.GrupoMuscular</p>
+                <p><span class="text-gym-muted">Tipo de entrenamiento:</span> @Machine.Tipo.Label()</p>
+                <p class="text-gray-300">@Machine.Descripcion</p>
+            </div>
+        </div>
+        <h3 class="mt-5 font-bold">Instrucciones básicas de uso</h3>
+        <p class="mt-1 whitespace-pre-line text-sm text-gray-300">
+            @(string.IsNullOrWhiteSpace(Machine.Instrucciones) ? "Consulta al personal del gimnasio si tienes dudas sobre su uso." : Machine.Instrucciones)
+        </p>
+    }
+</Modal>
+
+@code {
+    [Parameter] public MachineDto? Machine { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+}

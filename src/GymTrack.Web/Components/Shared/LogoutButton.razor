@@ -1,0 +1,9 @@
+<form method="post" action="/cuenta/cerrar-sesion">
+    <AntiforgeryToken />
+    <input type="hidden" name="returnUrl" value="/" />
+    <button type="submit" class="@Class">Cerrar sesión</button>
+</form>
+
+@code {
+    [Parameter] public string Class { get; set; } = "btn-ghost btn-sm";
+}

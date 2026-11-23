@@ -1,0 +1,14 @@
+bin/
+obj/
+node_modules/
+.vs/
+.idea/
+*.user
+src/GymTrack.Web/wwwroot/css/tailwind.css
+src/GymTrack.Web/App_Data/*
+!src/GymTrack.Web/App_Data/.gitkeep
+src/GymTrack.Web/wwwroot/uploads/machines/*
+!src/GymTrack.Web/wwwroot/uploads/machines/.gitkeep
+*.db
+*.db-shm
+*.db-wal

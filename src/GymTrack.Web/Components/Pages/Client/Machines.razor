@@ -1,0 +1,73 @@
+@page "/app/maquinas"
+@inject IMachineService MachineService
+@inject ILookupService Lookups
+
+<PageTitle>Máquinas · GymTrack</PageTitle>
+
+<PageHeader Title="Catálogo de máquinas" Subtitle="Consulta el equipo del gimnasio y si está disponible." />
+<Alert Kind="error" Message="@Error" />
+
+<div class="card mb-6 grid gap-3 md:grid-cols-4">
+    <div>
+        <label for="buscar" class="label-gym">Nombre</label>
+        <input id="buscar" class="input-gym" placeholder="Buscar máquina…" @bind="filter.Texto" @bind:event="oninput" @bind:after="Load" />
+    </div>
+    <div>
+        <label for="grupo" class="label-gym">Grupo muscular</label>
+        <select id="grupo" class="input-gym" @bind="filter.MuscleGroupId" @bind:after="Load">
+            <option value="">Todos</option>
+            @foreach (var g in groups) { <option value="@g.Id">@g.Nombre</option> }
+        </select>
+    </div>
+    <div>
+        <label for="tipo" class="label-gym">Tipo de entrenamiento</label>
+        <select id="tipo" class="input-gym" @bind="filter.Tipo" @bind:after="Load">
+            <option value="">Todos</option>
+            <option value="@TrainingType.Fuerza">Fuerza</option>
+            <option value="@TrainingType.Cardiovascular">Cardiovascular</option>
+        </select>
+    </div>
+    <div>
+        <label for="estado" class="label-gym">Disponibilidad</label>
+        <select id="estado" class="input-gym" @bind="filter.Estado" @bind:after="Load">
+            <option value="">Todas</option>
+            @foreach (var s in Enum.GetValues<MachineStatus>()) { <option value="@s">@s.Label()</option> }
+        </select>
+    </div>
+</div>
+
+@if (machines == null)
+{
+    <p class="text-gym-muted">Cargando…</p>
+}
+else if (machines.Count == 0)
+{
+    <p class="text-gym-muted">No se encontraron máquinas con esos filtros.</p>
+}
+else
+{
+    <p class="mb-3 text-sm text-gym-muted">@machines.Count máquina(s)</p>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach (var m in machines)
+        {
+            <MachineCard Machine="m" OnSelect="m2 => selected = m2" />
+        }
+    </div>
+}
+
+<MachineDetail Machine="selected" OnClose="() => selected = null" />
+
+@code {
+    private readonly MachineFilter filter = new();
+    private IReadOnlyList<MachineDto>? machines;
+    private IReadOnlyList<LookupDto> groups = Array.Empty<LookupDto>();
+    private MachineDto? selected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Safe(async () => groups = await Lookups.GetMuscleGroupsAsync());
+        await Load();
+    }
+
+    private async Task Load() => await Safe(async () => machines = await MachineService.SearchAsync(filter), keepMessages: true);
+}

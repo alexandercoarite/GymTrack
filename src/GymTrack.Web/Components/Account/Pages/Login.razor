@@ -1,0 +1,89 @@
+@page "/cuenta/iniciar-sesion"
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager Nav
+
+<PageTitle>Iniciar sesión · GymTrack</PageTitle>
+
+<div class="mx-auto max-w-md px-4 py-12">
+    <div class="card">
+        <h1 class="text-2xl font-extrabold">Iniciar sesión</h1>
+        <p class="mb-5 mt-1 text-sm text-gym-muted">Accede a tu panel de entrenamiento.</p>
+
+        <Alert Kind="error" Message="@error" />
+
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login" class="space-y-4">
+            <DataAnnotationsValidator />
+            <div>
+                <label for="identificador" class="label-gym">Correo electrónico o nombre de usuario</label>
+                <InputText id="identificador" @bind-Value="Input.Identificador" class="input-gym" autocomplete="username" />
+                <ValidationMessage For="() => Input.Identificador" />
+            </div>
+            <div>
+                <label for="password" class="label-gym">Contraseña</label>
+                <InputText id="password" type="password" @bind-Value="Input.Password" class="input-gym" autocomplete="current-password" />
+                <ValidationMessage For="() => Input.Password" />
+            </div>
+            <label class="flex items-center gap-2 text-sm text-gray-300">
+                <InputCheckbox @bind-Value="Input.Recordarme" /> Recordar mi sesión
+            </label>
+            <button type="submit" class="btn-primary w-full">Entrar</button>
+        </EditForm>
+
+        <div class="mt-5 flex justify-between text-sm">
+            <a href="/cuenta/recuperar" class="text-gym-accent hover:underline">¿Olvidaste tu contraseña?</a>
+            <a href="/cuenta/registro" class="text-gym-accent hover:underline">Crear cuenta</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string? error;
+
+    [SupplyParameterFromForm] private LoginModel Input { get; set; } = default!;
+
+    protected override void OnInitialized() => Input ??= new();
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    private async Task LoginUser()
+    {
+        var id = Input.Identificador.Trim();
+        var user = await UserManager.FindByEmailAsync(id) ?? await UserManager.FindByNameAsync(id);
+
+        if (user is null || !user.Activo)
+        {
+            error = "Credenciales incorrectas o cuenta desactivada.";
+            return;
+        }
+
+        var result = await SignInManager.PasswordSignInAsync(user, Input.Password, Input.Recordarme, lockoutOnFailure: true);
+        if (result.Succeeded)
+        {
+            var isAdmin = await UserManager.IsInRoleAsync(user, AppRoles.Admin);
+            var target = IsLocalUrl(ReturnUrl) ? ReturnUrl! : (isAdmin ? "/admin" : "/app");
+            Nav.NavigateTo(target, forceLoad: true);
+        }
+        else if (result.IsLockedOut)
+        {
+            error = "Demasiados intentos fallidos. Tu cuenta está bloqueada temporalmente; inténtalo más tarde.";
+        }
+        else
+        {
+            error = "Credenciales incorrectas o cuenta desactivada.";
+        }
+    }
+
+    private static bool IsLocalUrl(string? url) =>
+        !string.IsNullOrEmpty(url) && url[0] == '/' && !url.StartsWith("//") && !url.StartsWith("/\\");
+
+    private sealed class LoginModel
+    {
+        [Required(ErrorMessage = "Escribe tu correo o nombre de usuario.")]
+        public string Identificador { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Escribe tu contraseña.")]
+        public string Password { get; set; } = string.Empty;
+
+        public bool Recordarme { get; set; }
+    }
+}

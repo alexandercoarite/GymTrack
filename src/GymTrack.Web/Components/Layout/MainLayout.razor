@@ -1,0 +1,43 @@
+@inherits LayoutComponentBase
+@inject IOptions<GymInfo> Info
+
+<div class="flex min-h-screen flex-col">
+    <header class="sticky top-0 z-40 border-b border-gym-border bg-gym-black/90 backdrop-blur">
+        <nav class="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Navegación principal">
+            <a href="/" class="text-xl font-extrabold tracking-tight">Gym<span class="text-gym-accent">Track</span></a>
+
+            <input id="nav-toggle" type="checkbox" class="peer hidden" />
+            <label for="nav-toggle" class="btn-ghost btn-sm cursor-pointer md:hidden" aria-label="Abrir menú">☰ Menú</label>
+
+            <div class="absolute left-0 right-0 top-full hidden flex-col items-start gap-4 border-b border-gym-border bg-gym-black p-4 peer-checked:flex md:static md:flex md:flex-row md:items-center md:border-0 md:bg-transparent md:p-0">
+                <a href="/#servicios" class="text-sm text-gray-300 hover:text-gym-accent">Servicios</a>
+                <a href="/#maquinas" class="text-sm text-gray-300 hover:text-gym-accent">Máquinas</a>
+                <a href="/#horarios" class="text-sm text-gray-300 hover:text-gym-accent">Horarios</a>
+                <a href="/#contacto" class="text-sm text-gray-300 hover:text-gym-accent">Contacto</a>
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="@(context.User.IsInRole("Admin") ? "/admin" : "/app")" class="btn-primary btn-sm">Mi panel</a>
+                        <LogoutButton />
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/cuenta/iniciar-sesion" class="btn-ghost btn-sm">Iniciar sesión</a>
+                        <a href="/cuenta/registro" class="btn-primary btn-sm">Registrarse</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-1">
+        <ErrorBoundary>
+            @Body
+        </ErrorBoundary>
+    </main>
+
+    <footer class="border-t border-gym-border bg-gym-dark">
+        <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-sm text-gym-muted md:flex-row">
+            <p>© @DateTime.Now.Year @Info.Value.Name. Todos los derechos reservados.</p>
+            <p>Las rutinas y recomendaciones son orientativas y no reemplazan el consejo médico.</p>
+        </div>
+    </footer>
+</div>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>GymTrack.Web</RootNamespace>
+    <UserSecretsId>gymtrack-web-7c1f2b9e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GymTrack.Application\GymTrack.Application.csproj" />
+    <ProjectReference Include="..\GymTrack.Infrastructure\GymTrack.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Con las dependencias de npm instaladas, recompila Tailwind. -->
+  <Target Name="BuildTailwind" BeforeTargets="BeforeBuild" Condition="'$(BuildTailwind)' != 'false' And (Exists('node_modules/.bin/tailwindcss') Or Exists('node_modules/.bin/tailwindcss.cmd'))">
+    <Exec Command="npm run css:build" />
+  </Target>
+</Project>

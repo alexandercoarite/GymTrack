@@ -1,0 +1,256 @@
+@page "/admin/maquinas"
+@inject IMachineService MachineSvc
+@inject ILookupService Lookups
+@inject IMachineImageStorage Images
+
+<PageTitle>Gestión de máquinas · GymTrack</PageTitle>
+
+<PageHeader Title="Gestión de máquinas" Subtitle="Registra, edita y controla el estado del equipo.">
+    <button type="button" class="btn-primary" @onclick="New">+ Nueva máquina</button>
+</PageHeader>
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+<div class="card mb-4 grid gap-3 md:grid-cols-3">
+    <input class="input-gym" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" @bind="filter.Texto" @bind:event="oninput" @bind:after="Load" />
+    <select class="input-gym" aria-label="Categoría" @bind="filter.CategoryId" @bind:after="Load">
+        <option value="">Todas las categorías</option>
+        @foreach (var c in categories) { <option value="@c.Id">@c.Nombre</option> }
+    </select>
+    <select class="input-gym" aria-label="Estado" @bind="filter.Estado" @bind:after="Load">
+        <option value="">Todos los estados</option>
+        @foreach (var s in Enum.GetValues<MachineStatus>()) { <option value="@s">@s.Label()</option> }
+    </select>
+</div>
+
+<div class="card overflow-x-auto">
+    @if (machines == null)
+    {
+        <p class="text-gym-muted">Cargando…</p>
+    }
+    else if (machines.Count == 0)
+    {
+        <p class="text-sm text-gym-muted">No hay máquinas que coincidan.</p>
+    }
+    else
+    {
+        <table class="table-gym">
+            <thead>
+                <tr><th></th><th>Nombre</th><th>Categoría</th><th>Grupo</th><th>Tipo</th><th>Estado</th><th class="text-right">Acciones</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var m in machines)
+                {
+                    <tr>
+                        <td>
+                            <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-gym-dark">
+                                @if (!string.IsNullOrWhiteSpace(m.ImagenRuta)) { <img src="@m.ImagenRuta" alt="" class="h-full w-full object-cover" /> }
+                                else { <span aria-hidden="true">🏋️</span> }
+                            </div>
+                        </td>
+                        <td class="font-semibold">@m.Nombre</td>
+                        <td>@m.Categoria</td>
+                        <td>@m.GrupoMuscular</td>
+                        <td>@m.Tipo.Label()</td>
+                        <td><StatusBadge Status="m.Estado" /></td>
+                        <td>
+                            <div class="flex flex-wrap justify-end gap-1">
+                                <button type="button" class="btn-ghost btn-sm" @onclick="() => Edit(m)">Editar</button>
+                                @if (m.Estado != MachineStatus.Disponible)
+                                {
+                                    <button type="button" class="btn-ghost btn-sm" @onclick="() => SetStatus(m, MachineStatus.Disponible)">Marcar disponible</button>
+                                }
+                                @if (m.Estado == MachineStatus.Disponible)
+                                {
+                                    <button type="button" class="btn-ghost btn-sm" @onclick="() => SetStatus(m, MachineStatus.FueraDeServicio)">Fuera de servicio</button>
+                                    <a href="/admin/mantenimiento?maquina=@m.Id" class="btn-ghost btn-sm">Mantenimiento</a>
+                                }
+                                <button type="button" class="btn-danger btn-sm" @onclick="() => toDelete = m">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<Modal Visible="showForm" Title="@(edit.Id == 0 ? "Nueva máquina" : "Editar máquina")" OnClose="CancelForm" Wide="true">
+    <EditForm Model="edit" OnValidSubmit="Save" class="space-y-4">
+        <DataAnnotationsValidator />
+        <Alert Kind="error" Message="@Error" />
+        <div>
+            <label for="nombre" class="label-gym">Nombre</label>
+            <InputText id="nombre" @bind-Value="edit.Nombre" class="input-gym" />
+            <ValidationMessage For="() => edit.Nombre" />
+        </div>
+        <div>
+            <label for="desc" class="label-gym">Descripción</label>
+            <InputTextArea id="desc" @bind-Value="edit.Descripcion" rows="2" class="input-gym" />
+            <ValidationMessage For="() => edit.Descripcion" />
+        </div>
+        <div>
+            <label for="instr" class="label-gym">Instrucciones básicas de uso</label>
+            <InputTextArea id="instr" @bind-Value="edit.Instrucciones" rows="3" class="input-gym" />
+            <ValidationMessage For="() => edit.Instrucciones" />
+        </div>
+        <div class="grid gap-4 md:grid-cols-3">
+            <div>
+                <label for="cat" class="label-gym">Categoría</label>
+                <InputSelect id="cat" @bind-Value="edit.CategoryId" class="input-gym">
+                    @foreach (var c in categories) { <option value="@c.Id">@c.Nombre</option> }
+                </InputSelect>
+                <ValidationMessage For="() => edit.CategoryId" />
+            </div>
+            <div>
+                <label for="grp" class="label-gym">Grupo muscular</label>
+                <InputSelect id="grp" @bind-Value="edit.MuscleGroupId" class="input-gym">
+                    @foreach (var g in groups) { <option value="@g.Id">@g.Nombre</option> }
+                </InputSelect>
+                <ValidationMessage For="() => edit.MuscleGroupId" />
+            </div>
+            <div>
+                <label for="tipo" class="label-gym">Tipo de entrenamiento</label>
+                <InputSelect id="tipo" @bind-Value="edit.Tipo" class="input-gym">
+                    <option value="@TrainingType.Fuerza">Fuerza</option>
+                    <option value="@TrainingType.Cardiovascular">Cardiovascular</option>
+                </InputSelect>
+            </div>
+        </div>
+        <div>
+            <label class="label-gym">Fotografía de la máquina</label>
+            <div class="flex items-center gap-4">
+                <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl bg-gym-dark">
+                    @if (!string.IsNullOrWhiteSpace(edit.ImagenRuta)) { <img src="@edit.ImagenRuta" alt="Vista previa" class="h-full w-full object-cover" /> }
+                    else { <span class="text-3xl" aria-hidden="true">🏋️</span> }
+                </div>
+                <div class="space-y-2">
+                    <InputFile OnChange="OnImage" accept="image/jpeg,image/png,image/webp" class="text-sm" />
+                    <p class="hint-gym">JPG, PNG o WEBP · máximo 2 MB.</p>
+                    @if (!string.IsNullOrWhiteSpace(edit.ImagenRuta))
+                    {
+                        <button type="button" class="btn-ghost btn-sm" @onclick="RemoveImage">Quitar imagen</button>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+            <button type="button" class="btn-ghost" @onclick="CancelForm">Cancelar</button>
+            <button type="submit" class="btn-primary" disabled="@Busy">Guardar</button>
+        </div>
+    </EditForm>
+</Modal>
+
+<ConfirmDialog Visible="toDelete != null" Title="Eliminar máquina"
+               Message="@($"¿Eliminar «{toDelete?.Nombre}»? Se borrará también su historial de mantenimiento; las rutinas que la usaban se conservan sin máquina asignada.")"
+               OnConfirm="Delete" OnCancel="() => toDelete = null" />
+
+@code {
+    private readonly MachineFilter filter = new();
+    private IReadOnlyList<MachineDto>? machines;
+    private IReadOnlyList<LookupDto> categories = Array.Empty<LookupDto>();
+    private IReadOnlyList<LookupDto> groups = Array.Empty<LookupDto>();
+    private MachineEditModel edit = new();
+    private string? originalImage;
+    private bool showForm;
+    private MachineDto? toDelete;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Safe(async () =>
+        {
+            categories = await Lookups.GetCategoriesAsync();
+            groups = await Lookups.GetMuscleGroupsAsync();
+        });
+        await Load();
+    }
+
+    private async Task Load() => await Safe(async () => machines = await MachineSvc.SearchAsync(filter), keepMessages: true);
+
+    private void New()
+    {
+        Error = null; Ok = null;
+        edit = new MachineEditModel
+        {
+            CategoryId = categories.FirstOrDefault()?.Id ?? 0,
+            MuscleGroupId = groups.FirstOrDefault()?.Id ?? 0
+        };
+        originalImage = null;
+        showForm = true;
+    }
+
+    private void Edit(MachineDto m)
+    {
+        Error = null; Ok = null;
+        edit = MachineEditModel.From(m);
+        originalImage = m.ImagenRuta;
+        showForm = true;
+    }
+
+    private void CancelForm()
+    {
+        // Si se subió una imagen nueva que no se guardó, se elimina el archivo.
+        if (edit.ImagenRuta != originalImage) Images.Delete(edit.ImagenRuta);
+        showForm = false;
+        Error = null;
+    }
+
+    private async Task OnImage(InputFileChangeEventArgs e)
+    {
+        if (e.File.Size > ImageValidator.MaxMachineImageBytes)
+        {
+            Error = "La imagen supera el tamaño máximo de 2 MB.";
+            return;
+        }
+        await Safe(async () =>
+        {
+            await using var stream = e.File.OpenReadStream(ImageValidator.MaxMachineImageBytes);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var path = await Images.SaveAsync(ms.ToArray());
+            if (edit.ImagenRuta != originalImage) Images.Delete(edit.ImagenRuta);
+            edit.ImagenRuta = path;
+        });
+    }
+
+    private void RemoveImage()
+    {
+        if (edit.ImagenRuta != originalImage) Images.Delete(edit.ImagenRuta);
+        edit.ImagenRuta = null;
+    }
+
+    private async Task Save()
+    {
+        var saved = await Safe(async () =>
+        {
+            if (edit.Id == 0) await MachineSvc.CreateAsync(edit);
+            else await MachineSvc.UpdateAsync(edit);
+        }, "Máquina guardada correctamente.");
+
+        if (saved)
+        {
+            showForm = false;
+            await Load();
+            Ok = "Máquina guardada correctamente.";
+        }
+    }
+
+    private async Task SetStatus(MachineDto m, MachineStatus status)
+    {
+        await Safe(async () => await MachineSvc.ChangeStatusAsync(m.Id, status), "Estado actualizado.");
+        var message = Ok;
+        await Load();
+        Ok = message;
+    }
+
+    private async Task Delete()
+    {
+        var target = toDelete;
+        toDelete = null;
+        if (target == null) return;
+        await Safe(async () => await MachineSvc.DeleteAsync(target.Id), "Máquina eliminada.");
+        var message = Ok;
+        await Load();
+        Ok = message;
+    }
+}

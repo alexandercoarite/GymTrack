@@ -1,0 +1,115 @@
+@page "/admin/usuarios/{Id}"
+@inject IUserAdminService Users
+
+<PageTitle>Perfil de usuario · GymTrack</PageTitle>
+
+<PageHeader Title="Perfil de usuario" Subtitle="Información de la cuenta y evaluaciones.">
+    <a href="/admin/usuarios" class="btn-ghost">← Volver</a>
+</PageHeader>
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+@if (!loaded)
+{
+    <p class="text-gym-muted">Cargando…</p>
+}
+else if (user == null)
+{
+    <p class="text-gym-muted">El usuario no existe.</p>
+}
+else
+{
+    <div class="grid gap-6 lg:grid-cols-2">
+        <section class="card">
+            <h2 class="text-xl font-bold">@user.Nombre @user.Apellido</h2>
+            <dl class="mt-4 space-y-2 text-sm">
+                <div class="flex justify-between"><dt class="text-gym-muted">Correo</dt><dd>@user.Email</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Usuario</dt><dd>@user.UserName</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Teléfono</dt><dd>@(user.Telefono ?? "—")</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Nacimiento</dt><dd>@(user.FechaNacimiento?.ToString("dd/MM/yyyy") ?? "—")</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Registro</dt><dd>@user.FechaRegistro.ToLocalTime().ToString("dd/MM/yyyy")</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Objetivo</dt><dd>@(user.Objetivo ?? "—")</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Nivel</dt><dd>@(user.Nivel ?? "—")</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Estado</dt><dd><span class="badge @(user.Activo ? "badge-ok" : "badge-bad")">@(user.Activo ? "Activa" : "Desactivada")</span></dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Rol</dt><dd>@user.Rol</dd></div>
+            </dl>
+            <p class="hint-gym">Las contraseñas nunca son visibles para el personal.</p>
+
+            <div class="mt-5 flex flex-wrap gap-2">
+                <button type="button" class="@(user.Activo ? "btn-danger" : "btn-primary")" @onclick="ToggleActive">@(user.Activo ? "Desactivar cuenta" : "Activar cuenta")</button>
+                @if (user.Rol == AppRoles.Client)
+                {
+                    <button type="button" class="btn-ghost" @onclick="() => confirmRole = AppRoles.Admin">Convertir en administrador</button>
+                }
+                else
+                {
+                    <button type="button" class="btn-ghost" @onclick="() => confirmRole = AppRoles.Client">Cambiar a cliente</button>
+                }
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="font-bold">Historial de evaluaciones</h2>
+            <p class="hint-gym">Solo se muestran fechas y resultados; las fotografías son privadas y solo las ve su propietario.</p>
+            @if (assessments.Count == 0)
+            {
+                <p class="mt-3 text-sm text-gym-muted">Este usuario no tiene evaluaciones.</p>
+            }
+            else
+            {
+                <ul class="mt-3 divide-y divide-gym-border text-sm">
+                    @foreach (var a in assessments)
+                    {
+                        <li class="py-2">
+                            <p class="font-semibold">@a.Fecha.ToLocalTime().ToString("dd/MM/yyyy HH:mm") · <span class="badge badge-neutral">@a.Estado.Label()</span></p>
+                            @if (!string.IsNullOrWhiteSpace(a.Resultado)) { <p class="text-gray-300">@a.Resultado</p> }
+                            @if (!string.IsNullOrWhiteSpace(a.Observaciones)) { <p class="text-gray-400">Notas: @a.Observaciones</p> }
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+}
+
+<ConfirmDialog Visible="confirmRole != null" Title="Cambiar rol" ConfirmText="Confirmar"
+               Message="@($"¿Cambiar el rol de este usuario a {confirmRole}? Sus sesiones abiertas se cerrarán.")"
+               OnConfirm="ChangeRole" OnCancel="() => confirmRole = null" />
+
+@code {
+    [Parameter] public string Id { get; set; } = string.Empty;
+
+    private UserDetailDto? user;
+    private List<AssessmentDto> assessments = new();
+    private bool loaded;
+    private string? confirmRole;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Load();
+        loaded = true;
+    }
+
+    private async Task Load() =>
+        await Safe(async () =>
+        {
+            user = await Users.GetAsync(Id);
+            assessments = user == null ? new() : (await Users.GetAssessmentsAsync(Id)).ToList();
+        }, keepMessages: true);
+
+    private async Task ToggleActive()
+    {
+        if (user == null) return;
+        await Safe(async () => await Users.SetActiveAsync(user.Id, !user.Activo), user.Activo ? "Cuenta desactivada." : "Cuenta activada.");
+        await Load();
+    }
+
+    private async Task ChangeRole()
+    {
+        var role = confirmRole;
+        confirmRole = null;
+        if (role == null || user == null) return;
+        await Safe(async () => await Users.SetRoleAsync(user.Id, role), "Rol actualizado.");
+        await Load();
+    }
+}

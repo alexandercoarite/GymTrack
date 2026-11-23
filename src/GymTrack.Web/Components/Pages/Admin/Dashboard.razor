@@ -1,0 +1,69 @@
+@page "/admin"
+@inject IDashboardService DashboardSvc
+@inject IOptions<GymInfo> Info
+
+<PageTitle>Panel de administración · GymTrack</PageTitle>
+
+<PageHeader Title="Panel de administración" Subtitle="@Info.Value.Name" />
+<Alert Kind="error" Message="@Error" />
+
+@if (data == null)
+{
+    <p class="text-gym-muted">Cargando…</p>
+}
+else
+{
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard Label="Clientes registrados" Value="@data.Clientes.ToString()" Accent="true" Hint="@($"{data.AltasUltimos30Dias} alta(s) en los últimos 30 días")" />
+        <StatCard Label="Máquinas" Value="@data.Maquinas.ToString()" />
+        <StatCard Label="Disponibles" Value="@data.Disponibles.ToString()" />
+        <StatCard Label="En mantenimiento" Value="@data.EnMantenimiento.ToString()" Hint="@($"{data.FueraDeServicio} fuera de servicio")" />
+    </div>
+
+    <div class="mt-6 grid gap-4 lg:grid-cols-2">
+        <section class="card">
+            <div class="flex items-center justify-between">
+                <h2 class="font-bold">Altas recientes</h2>
+                <a href="/admin/usuarios" class="text-sm text-gym-accent hover:underline">Ver usuarios</a>
+            </div>
+            @if (data.Recientes.Count == 0)
+            {
+                <p class="mt-3 text-sm text-gym-muted">Aún no hay clientes registrados.</p>
+            }
+            else
+            {
+                <ul class="mt-3 divide-y divide-gym-border text-sm">
+                    @foreach (var u in data.Recientes)
+                    {
+                        <li class="flex items-center justify-between gap-2 py-2">
+                            <span><span class="font-semibold">@u.Nombre</span> <span class="text-gym-muted">· @u.Email</span></span>
+                            <span class="text-xs text-gym-muted">@u.FechaRegistro.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+
+        <section class="card">
+            <h2 class="font-bold">Accesos rápidos</h2>
+            <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+                <a href="/admin/maquinas" class="btn-ghost">🏋️ Máquinas</a>
+                <a href="/admin/mantenimiento" class="btn-ghost">🛠️ Mantenimiento (@data.MantenimientosAbiertos)</a>
+                <a href="/admin/horarios" class="btn-ghost">🕒 Horarios</a>
+                <a href="/admin/categorias" class="btn-ghost">🗂️ Categorías</a>
+            </div>
+            <dl class="mt-5 space-y-1 text-sm text-gray-300">
+                <div class="flex justify-between"><dt class="text-gym-muted">Dirección</dt><dd>@Info.Value.Address</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Teléfono</dt><dd>@Info.Value.Phone</dd></div>
+                <div class="flex justify-between"><dt class="text-gym-muted">Correo</dt><dd>@Info.Value.Email</dd></div>
+            </dl>
+        </section>
+    </div>
+}
+
+@code {
+    private AdminDashboardDto? data;
+
+    protected override async Task OnInitializedAsync() =>
+        await Safe(async () => data = await DashboardSvc.GetAdminAsync());
+}

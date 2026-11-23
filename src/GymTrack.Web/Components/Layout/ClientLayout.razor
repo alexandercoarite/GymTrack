@@ -1,0 +1,16 @@
+@inherits LayoutComponentBase
+
+<SidebarShell Area="Cliente" Items="Items">@Body</SidebarShell>
+
+@code {
+    private static readonly NavItem[] Items =
+    {
+        new("/app", "Mi panel", "🏠", true),
+        new("/app/cuestionario", "Cuestionario", "📝"),
+        new("/app/rutinas", "Mis rutinas", "📋"),
+        new("/app/maquinas", "Máquinas", "🏋️"),
+        new("/app/evaluacion", "Evaluación corporal", "📸"),
+        new("/app/progreso", "Mi progreso", "📈"),
+        new("/app/perfil", "Mi perfil", "👤"),
+    };
+}

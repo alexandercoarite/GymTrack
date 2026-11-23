@@ -1,0 +1,164 @@
+@page "/admin/categorias"
+@inject ILookupService Lookups
+
+<PageTitle>Categorías · GymTrack</PageTitle>
+
+<PageHeader Title="Categorías y grupos musculares" Subtitle="Organiza el catálogo de máquinas." />
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+<div class="grid gap-6 lg:grid-cols-2">
+    <section class="card">
+        <div class="mb-3 flex items-center justify-between">
+            <h2 class="font-bold">Categorías de máquinas</h2>
+            <button type="button" class="btn-primary btn-sm" @onclick="() => New(Kind.Category)">+ Nueva</button>
+        </div>
+        @if (categories.Count == 0) { <p class="text-sm text-gym-muted">No hay categorías.</p> }
+        else
+        {
+            <table class="table-gym">
+                <thead><tr><th>Nombre</th><th>Máquinas</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var c in categories)
+                    {
+                        <tr>
+                            <td><p class="font-semibold">@c.Nombre</p><p class="text-xs text-gym-muted">@c.Descripcion</p></td>
+                            <td>@c.Usos</td>
+                            <td class="text-right">
+                                <button type="button" class="btn-ghost btn-sm" @onclick="() => Edit(Kind.Category, c)">Editar</button>
+                                <button type="button" class="btn-danger btn-sm" @onclick="() => Ask(Kind.Category, c)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+
+    <section class="card">
+        <div class="mb-3 flex items-center justify-between">
+            <h2 class="font-bold">Grupos musculares</h2>
+            <button type="button" class="btn-primary btn-sm" @onclick="() => New(Kind.Group)">+ Nuevo</button>
+        </div>
+        @if (groups.Count == 0) { <p class="text-sm text-gym-muted">No hay grupos musculares.</p> }
+        else
+        {
+            <table class="table-gym">
+                <thead><tr><th>Nombre</th><th>Máquinas y ejercicios</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var g in groups)
+                    {
+                        <tr>
+                            <td class="font-semibold">@g.Nombre</td>
+                            <td>@g.Usos</td>
+                            <td class="text-right">
+                                <button type="button" class="btn-ghost btn-sm" @onclick="() => Edit(Kind.Group, g)">Editar</button>
+                                <button type="button" class="btn-danger btn-sm" @onclick="() => Ask(Kind.Group, g)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </section>
+</div>
+
+<Modal Visible="showForm" Title="@FormTitle" OnClose="() => showForm = false">
+    <EditForm Model="model" OnValidSubmit="Save" class="space-y-4">
+        <DataAnnotationsValidator />
+        <Alert Kind="error" Message="@Error" />
+        <div>
+            <label for="nombre" class="label-gym">Nombre</label>
+            <InputText id="nombre" @bind-Value="model.Nombre" class="input-gym" />
+            <ValidationMessage For="() => model.Nombre" />
+        </div>
+        @if (kind == Kind.Category)
+        {
+            <div>
+                <label for="desc" class="label-gym">Descripción (opcional)</label>
+                <InputTextArea id="desc" @bind-Value="model.Descripcion" rows="2" class="input-gym" />
+                <ValidationMessage For="() => model.Descripcion" />
+            </div>
+        }
+        <div class="flex justify-end gap-2">
+            <button type="button" class="btn-ghost" @onclick="() => showForm = false">Cancelar</button>
+            <button type="submit" class="btn-primary" disabled="@Busy">Guardar</button>
+        </div>
+    </EditForm>
+</Modal>
+
+<ConfirmDialog Visible="toDelete != null" Title="Eliminar"
+               Message="@($"¿Eliminar «{toDelete?.Nombre}»? Solo es posible si no tiene elementos asociados.")"
+               OnConfirm="Delete" OnCancel="() => toDelete = null" />
+
+@code {
+    private enum Kind { Category, Group }
+
+    private IReadOnlyList<LookupDto> categories = Array.Empty<LookupDto>();
+    private IReadOnlyList<LookupDto> groups = Array.Empty<LookupDto>();
+    private LookupEditModel model = new();
+    private Kind kind;
+    private bool showForm;
+    private LookupDto? toDelete;
+    private Kind deleteKind;
+
+    private string FormTitle => (model.Id == 0 ? "Nueva " : "Editar ") + (kind == Kind.Category ? "categoría" : "grupo muscular");
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load() =>
+        await Safe(async () =>
+        {
+            categories = await Lookups.GetCategoriesAsync();
+            groups = await Lookups.GetMuscleGroupsAsync();
+        }, keepMessages: true);
+
+    private void New(Kind k)
+    {
+        kind = k;
+        model = new LookupEditModel();
+        Error = null; Ok = null;
+        showForm = true;
+    }
+
+    private void Edit(Kind k, LookupDto item)
+    {
+        kind = k;
+        model = new LookupEditModel { Id = item.Id, Nombre = item.Nombre, Descripcion = item.Descripcion };
+        Error = null; Ok = null;
+        showForm = true;
+    }
+
+    private void Ask(Kind k, LookupDto item)
+    {
+        deleteKind = k;
+        toDelete = item;
+    }
+
+    private async Task Save()
+    {
+        var saved = await Safe(async () =>
+        {
+            if (kind == Kind.Category) await Lookups.SaveCategoryAsync(model);
+            else await Lookups.SaveMuscleGroupAsync(model);
+        }, "Guardado correctamente.");
+        if (saved)
+        {
+            showForm = false;
+            await Load();
+        }
+    }
+
+    private async Task Delete()
+    {
+        var target = toDelete;
+        toDelete = null;
+        if (target == null) return;
+        await Safe(async () =>
+        {
+            if (deleteKind == Kind.Category) await Lookups.DeleteCategoryAsync(target.Id);
+            else await Lookups.DeleteMuscleGroupAsync(target.Id);
+        }, "Eliminado correctamente.");
+        await Load();
+    }
+}

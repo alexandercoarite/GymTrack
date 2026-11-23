@@ -1,0 +1,148 @@
+@page "/app/cuestionario"
+@inject IQuestionnaireService QuestionnaireSvc
+@inject IRoutineService Routines
+@inject ILookupService Lookups
+@inject NavigationManager Nav
+
+<PageTitle>Cuestionario · GymTrack</PageTitle>
+
+<PageHeader Title="Cuestionario de personalización" Subtitle="Tus respuestas se usan para generar y actualizar tus rutinas." />
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+@if (model == null)
+{
+    <p class="text-gym-muted">Cargando…</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="Submit" class="space-y-6">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <section class="card">
+            <h2 class="font-bold">Objetivos y experiencia</h2>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
+                    <label for="objetivo" class="label-gym">¿Cuál es tu objetivo principal?</label>
+                    <InputSelect id="objetivo" @bind-Value="model.Objetivo" class="input-gym">
+                        @foreach (var g in Enum.GetValues<GoalType>()) { <option value="@g">@g.Label()</option> }
+                    </InputSelect>
+                </div>
+                <div>
+                    <label for="nivel" class="label-gym">¿Cuál es tu nivel de experiencia?</label>
+                    <InputSelect id="nivel" @bind-Value="model.Nivel" class="input-gym">
+                        @foreach (var l in Enum.GetValues<ExperienceLevel>()) { <option value="@l">@l.Label()</option> }
+                    </InputSelect>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="font-bold">Disponibilidad</h2>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
+                    <label for="dias" class="label-gym">¿Cuántos días por semana puedes entrenar?</label>
+                    <InputSelect id="dias" @bind-Value="model.DiasPorSemana" class="input-gym">
+                        @for (var d = 1; d <= 7; d++) { <option value="@d">@d día(s)</option> }
+                    </InputSelect>
+                </div>
+                <div>
+                    <label for="duracion" class="label-gym">¿Cuánto tiempo tienes por sesión?</label>
+                    <InputSelect id="duracion" @bind-Value="model.DuracionSesionMin" class="input-gym">
+                        <option value="30">30 minutos</option>
+                        <option value="45">45 minutos</option>
+                        <option value="60">60 minutos</option>
+                        <option value="90">90 minutos o más</option>
+                    </InputSelect>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="font-bold">Preferencias</h2>
+            <div class="mt-4 space-y-4">
+                <div>
+                    <label for="tipo" class="label-gym">¿Qué tipo de entrenamiento prefieres?</label>
+                    <InputSelect id="tipo" @bind-Value="model.TipoPreferido" class="input-gym">
+                        <option value="@TrainingType.Fuerza">Fuerza</option>
+                        <option value="@TrainingType.Cardiovascular">Cardiovascular</option>
+                        <option value="@TrainingType.Combinado">Combinado</option>
+                    </InputSelect>
+                </div>
+                <fieldset>
+                    <legend class="label-gym">¿Qué grupos musculares deseas trabajar?</legend>
+                    <div class="grid gap-2 sm:grid-cols-3">
+                        @foreach (var g in groups)
+                        {
+                            var id = g.Id;
+                            <label class="flex items-center gap-2 text-sm text-gray-200">
+                                <input type="checkbox" checked="@model.GruposMusculares.Contains(id)"
+                                       @onchange="e => Toggle(id, e.Value is true)" />
+                                @g.Nombre
+                            </label>
+                        }
+                    </div>
+                    <p class="hint-gym">Si no eliges ninguno, se trabajarán todos.</p>
+                </fieldset>
+                <div>
+                    <label for="evitar" class="label-gym">¿Tienes ejercicios que prefieras evitar? (opcional)</label>
+                    <InputText id="evitar" @bind-Value="model.EjerciciosAEvitar" class="input-gym" placeholder="Ej.: sentadilla, zancadas" />
+                    <p class="hint-gym">Sepáralos con comas.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="font-bold">Condiciones y limitaciones (opcional)</h2>
+            <p class="mt-1 text-sm text-gym-muted">
+                Usamos esta información solo para recomendarte precaución y sugerirte consultar a un profesional antes de
+                ejercicios que puedan representar un riesgo. No es obligatoria.
+            </p>
+            <div class="mt-4">
+                <label for="limitaciones" class="label-gym">¿Tienes alguna lesión, molestia o indicación profesional que debamos considerar?</label>
+                <InputTextArea id="limitaciones" @bind-Value="model.Limitaciones" rows="3" class="input-gym" />
+            </div>
+        </section>
+
+        <label class="flex items-center gap-2 text-sm text-gray-200">
+            <input type="checkbox" @bind="generate" /> Generar mi rutina al guardar
+        </label>
+        <button type="submit" class="btn-primary" disabled="@Busy">@(Busy ? "Guardando…" : "Guardar respuestas")</button>
+    </EditForm>
+}
+
+@code {
+    private QuestionnaireModel? model;
+    private List<LookupDto> groups = new();
+    private bool generate = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Safe(async () =>
+        {
+            groups = (await Lookups.GetMuscleGroupsAsync()).Where(g => g.Nombre != "Cardio").ToList();
+            model = await QuestionnaireSvc.GetLatestAsync() ?? new QuestionnaireModel();
+        });
+        model ??= new QuestionnaireModel();
+    }
+
+    private void Toggle(int id, bool selected)
+    {
+        if (model == null) return;
+        if (selected && !model.GruposMusculares.Contains(id)) model.GruposMusculares.Add(id);
+        if (!selected) model.GruposMusculares.Remove(id);
+    }
+
+    private async Task Submit()
+    {
+        if (model == null) return;
+        var saved = await Safe(async () =>
+        {
+            await QuestionnaireSvc.SaveAsync(model);
+            if (generate) await Routines.GenerateAsync();
+        }, generate ? null : "Tus respuestas se guardaron.");
+
+        if (saved && generate) Nav.NavigateTo("/app/rutinas");
+    }
+}

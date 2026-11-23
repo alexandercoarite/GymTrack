@@ -1,0 +1,12 @@
+<span class="badge @Css">@Status.Label()</span>
+
+@code {
+    [Parameter] public MachineStatus Status { get; set; }
+
+    private string Css => Status switch
+    {
+        MachineStatus.Disponible => "badge-ok",
+        MachineStatus.EnMantenimiento => "badge-warn",
+        _ => "badge-bad"
+    };
+}

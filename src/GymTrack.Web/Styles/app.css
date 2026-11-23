@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@source "../Components";
+
+@theme {
+  --color-gym-black: #0b0d10;
+  --color-gym-dark: #12161b;
+  --color-gym-card: #1a1f26;
+  --color-gym-border: #2a313a;
+  --color-gym-accent: #39ff14;
+  --color-gym-accent-dark: #2bd10f;
+  --color-gym-muted: #8b95a1;
+  --color-gym-danger: #ff4d4f;
+  --color-gym-warn: #ffb020;
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  html { color-scheme: dark; }
+  body { @apply bg-gym-black text-white font-display antialiased; }
+  h1:focus { outline: none; }
+  a { @apply transition-colors; }
+}
+
+@layer components {
+  .card { @apply rounded-2xl border border-gym-border bg-gym-card p-5; }
+
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gym-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-gym-accent-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gym-border px-4 py-2 text-sm font-semibold text-white transition hover:border-gym-accent hover:text-gym-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-gym-accent disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-danger { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gym-danger/60 px-4 py-2 text-sm font-semibold text-gym-danger transition hover:bg-gym-danger hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-gym-danger disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-sm { @apply px-3 py-1.5 text-xs; }
+
+  .input-gym { @apply w-full rounded-xl border border-gym-border bg-gym-dark px-3 py-2 text-sm text-white placeholder-gym-muted focus:border-gym-accent focus:outline-none focus:ring-1 focus:ring-gym-accent; }
+  .label-gym { @apply mb-1 block text-sm font-medium text-gray-200; }
+  .hint-gym { @apply mt-1 text-xs text-gym-muted; }
+  .validation-message { @apply mt-1 text-xs text-gym-danger; }
+  .valid.modified:not([type=checkbox]) { outline: 1px solid #39ff14; }
+  .invalid { outline: 1px solid #ff4d4f; }
+
+  .nav-link { @apply flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-gray-300 transition hover:bg-gym-card hover:text-white; }
+  .nav-link-active { @apply bg-gym-card text-gym-accent; }
+
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .badge-ok { @apply bg-green-500/15 text-green-400; }
+  .badge-warn { @apply bg-amber-500/15 text-amber-400; }
+  .badge-bad { @apply bg-red-500/15 text-red-400; }
+  .badge-neutral { @apply bg-white/10 text-gray-300; }
+
+  .table-gym { @apply w-full text-left text-sm; }
+  .table-gym th { @apply border-b border-gym-border px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gym-muted; }
+  .table-gym td { @apply border-b border-gym-border/60 px-3 py-3 align-middle; }
+
+  .fade-in { animation: fadeIn .35s ease-out both; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+#blazor-error-ui {
+  display: none;
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 100;
+  background: #ff4d4f;
+  color: #fff;
+  padding: .75rem 1.25rem;
+  font-size: .875rem;
+}
+#blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: .75rem; top: .5rem; }
+.blazor-error-boundary { background: #7f1d1d; color: #fff; padding: 1rem; border-radius: .75rem; }
+.blazor-error-boundary::after { content: "Ocurrió un error en esta sección. Recarga la página e inténtalo de nuevo."; }

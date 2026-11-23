@@ -1,0 +1,284 @@
+@page "/app/evaluacion"
+@implements IAsyncDisposable
+@inject IBodyAssessmentService Assessments
+@inject IJSRuntime JS
+
+<PageTitle>Evaluación corporal · GymTrack</PageTitle>
+
+<PageHeader Title="Evaluación corporal" Subtitle="Fotografías opcionales para comparar tu evolución. Son privadas y puedes eliminarlas cuando quieras." />
+<Alert Kind="error" Message="@Error" />
+<Alert Kind="success" Message="@Ok" />
+
+@if (!Assessments.AnalysisAvailable)
+{
+    <Alert Kind="warning" Message="El análisis automático de fotografías todavía no está disponible en este gimnasio. Puedes guardar fotografías de progreso para compararlas tú mismo y registrar tus medidas manualmente en «Mi progreso»." />
+}
+
+<section class="card mb-6">
+    <h2 class="font-bold">Cómo funciona</h2>
+    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-300">
+        <li>Es completamente opcional: tu rutina y tu progreso funcionan sin fotografías.</li>
+        <li>Usa ropa ajustada, buena luz y el mismo lugar en cada evaluación para que las imágenes sean comparables.</li>
+        <li>Toma una fotografía <strong>frontal</strong> (de pie, brazos relajados) y una <strong>lateral</strong> (de perfil).</li>
+        <li>No hacemos reconocimiento facial ni identificamos personas. Las fotografías no son públicas.</li>
+        <li>Cualquier estimación visual es aproximada: no es una medida clínica ni un valor exacto de peso, masa muscular o grasa corporal.</li>
+    </ul>
+</section>
+
+<section class="card mb-6">
+    <h2 class="font-bold">Nueva evaluación</h2>
+
+    <label class="mt-4 flex items-start gap-3 rounded-xl border border-gym-border p-3 text-sm">
+        <input type="checkbox" class="mt-1" @bind="consent" />
+        <span>
+            <strong>Doy mi consentimiento</strong> para que GymTrack use y almacene de forma privada las fotografías que subo,
+            para mi evaluación y seguimiento. Entiendo que puedo eliminarlas en cualquier momento.
+        </span>
+    </label>
+
+    @if (consent)
+    {
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+            @foreach (var type in new[] { PhotoType.Frontal, PhotoType.Lateral })
+            {
+                var t = type;
+                <div class="rounded-xl border border-gym-border p-3">
+                    <p class="mb-2 font-semibold">Fotografía @t.Label().ToLower()</p>
+                    <div class="mb-3 flex h-48 items-center justify-center overflow-hidden rounded-xl bg-gym-dark">
+                        @if (previews.TryGetValue(t, out var src))
+                        {
+                            <img src="@src" alt="Vista previa @t.Label().ToLower()" class="h-full w-full object-contain" />
+                        }
+                        else
+                        {
+                            <span class="text-sm text-gym-muted">Sin imagen</span>
+                        }
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" class="btn-ghost btn-sm" @onclick="() => OpenCamera(t)">📷 Usar cámara</button>
+                        <label class="btn-ghost btn-sm cursor-pointer">
+                            📁 Subir archivo
+                            <InputFile class="hidden" accept="image/jpeg,image/png,image/webp" OnChange="@(e => OnFile(t, e))" />
+                        </label>
+                        @if (previews.ContainsKey(t))
+                        {
+                            <button type="button" class="btn-danger btn-sm" @onclick="() => RemovePhoto(t)">Quitar</button>
+                        }
+                    </div>
+                    <p class="hint-gym">JPG, PNG o WEBP · máximo 5 MB.</p>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <label for="obs" class="label-gym">Observaciones (opcional)</label>
+            <textarea id="obs" rows="2" class="input-gym" maxlength="1000" @bind="notes"></textarea>
+        </div>
+
+        <label class="mt-3 flex items-center gap-2 text-sm text-gray-200">
+            <input type="checkbox" @bind="retain" /> Conservar mis fotografías para comparar evaluaciones futuras
+        </label>
+
+        <button type="button" class="btn-primary mt-5" @onclick="Save" disabled="@(Busy || photos.Count == 0)">
+            @(Busy ? "Guardando…" : "Guardar evaluación")
+        </button>
+    }
+</section>
+
+<section>
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-xl font-bold">Mis evaluaciones</h2>
+        @if (items.Count > 0)
+        {
+            <button type="button" class="btn-danger btn-sm" @onclick="() => confirmAll = true">Eliminar todas mis fotografías y evaluaciones</button>
+        }
+    </div>
+
+    @if (items.Count == 0)
+    {
+        <p class="text-sm text-gym-muted">Todavía no tienes evaluaciones.</p>
+    }
+    else
+    {
+        <div class="grid gap-4 lg:grid-cols-2">
+            @foreach (var a in items)
+            {
+                <article class="card fade-in">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <p class="font-semibold">@a.Fecha.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                            <span class="badge badge-neutral mt-1">@a.Estado.Label()</span>
+                        </div>
+                        <button type="button" class="btn-danger btn-sm" @onclick="() => toDelete = a">Eliminar</button>
+                    </div>
+                    @if (a.Fotos.Count > 0)
+                    {
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            @foreach (var f in a.Fotos)
+                            {
+                                <figure>
+                                    <img src="/api/fotos/@f.Id" alt="Fotografía @f.Tipo.Label().ToLower()" class="h-44 w-full rounded-xl object-cover" loading="lazy" />
+                                    <figcaption class="mt-1 text-xs text-gym-muted">@f.Tipo.Label()</figcaption>
+                                </figure>
+                            }
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(a.Resultado))
+                    {
+                        <p class="mt-3 text-sm text-gray-300">@a.Resultado</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(a.Observaciones))
+                    {
+                        <p class="mt-2 text-sm text-gray-400">Notas: @a.Observaciones</p>
+                    }
+                </article>
+            }
+        </div>
+    }
+</section>
+
+<Modal Visible="cameraOpen" Title="@($"Cámara · foto {cameraFor.Label().ToLower()}")" OnClose="CloseCamera">
+    @if (cameraError != null)
+    {
+        <Alert Kind="error" Message="@cameraError" />
+    }
+    <video @ref="video" autoplay playsinline muted class="w-full rounded-xl bg-black"></video>
+    <p class="hint-gym">La cámara solo funciona en conexiones seguras (HTTPS o localhost) y con tu permiso.</p>
+    <div class="mt-4 flex justify-end gap-2">
+        <button type="button" class="btn-ghost" @onclick="CloseCamera">Cancelar</button>
+        <button type="button" class="btn-primary" @onclick="Capture" disabled="@(cameraError != null)">Tomar foto</button>
+    </div>
+</Modal>
+
+<ConfirmDialog Visible="toDelete != null" Title="Eliminar evaluación"
+               Message="Se eliminarán la evaluación y sus fotografías de forma permanente."
+               OnConfirm="DeleteOne" OnCancel="() => toDelete = null" />
+
+<ConfirmDialog Visible="confirmAll" Title="Eliminar todo"
+               Message="Se eliminarán todas tus evaluaciones y fotografías de forma permanente. Esta acción no se puede deshacer."
+               ConfirmText="Eliminar todo" OnConfirm="DeleteAll" OnCancel="() => confirmAll = false" />
+
+@code {
+    private readonly Dictionary<PhotoType, byte[]> photos = new();
+    private readonly Dictionary<PhotoType, string> previews = new();
+    private List<AssessmentDto> items = new();
+    private bool consent, retain = true, confirmAll, cameraOpen, startCamera;
+    private string? notes, cameraError;
+    private PhotoType cameraFor;
+    private ElementReference video;
+    private AssessmentDto? toDelete;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load() => await Safe(async () => items = (await Assessments.ListAsync()).ToList(), keepMessages: true);
+
+    private void SetPhoto(PhotoType type, byte[] bytes)
+    {
+        var ext = ImageValidator.DetectExtension(bytes);
+        if (ext == null) { Error = "Formato no permitido. Usa imágenes JPG, PNG o WEBP."; return; }
+        photos[type] = bytes;
+        previews[type] = $"data:{ImageValidator.ContentTypeFor(ext)};base64,{Convert.ToBase64String(bytes)}";
+        Error = null;
+    }
+
+    private void RemovePhoto(PhotoType type)
+    {
+        photos.Remove(type);
+        previews.Remove(type);
+    }
+
+    private async Task OnFile(PhotoType type, InputFileChangeEventArgs e)
+    {
+        if (e.File.Size > ImageValidator.MaxPhotoBytes)
+        {
+            Error = "La imagen supera el tamaño máximo de 5 MB.";
+            return;
+        }
+        await Safe(async () =>
+        {
+            await using var stream = e.File.OpenReadStream(ImageValidator.MaxPhotoBytes);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            SetPhoto(type, ms.ToArray());
+        });
+    }
+
+    private void OpenCamera(PhotoType type)
+    {
+        cameraFor = type;
+        cameraError = null;
+        cameraOpen = true;
+        startCamera = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!startCamera) return;
+        startCamera = false;
+        var ok = await JS.InvokeAsync<bool>("gymCamera.start", video);
+        if (!ok)
+        {
+            cameraError = "No se pudo acceder a la cámara. Revisa los permisos del navegador o sube un archivo.";
+            StateHasChanged();
+        }
+    }
+
+    private async Task Capture()
+    {
+        var data = await JS.InvokeAsync<string?>("gymCamera.capture", video);
+        if (string.IsNullOrEmpty(data))
+        {
+            cameraError = "No se pudo capturar la imagen. Inténtalo de nuevo.";
+            return;
+        }
+        var comma = data.IndexOf(',');
+        SetPhoto(cameraFor, Convert.FromBase64String(data[(comma + 1)..]));
+        await CloseCamera();
+    }
+
+    private async Task CloseCamera()
+    {
+        cameraOpen = false;
+        await JS.InvokeVoidAsync("gymCamera.stop");
+    }
+
+    private async Task Save()
+    {
+        var model = new AssessmentCreateModel
+        {
+            Consentimiento = consent, ConservarFotos = retain, Observaciones = notes,
+            Fotos = photos.Select(p => new PhotoUpload { Tipo = p.Key, Contenido = p.Value }).ToList()
+        };
+        var saved = await Safe(async () => await Assessments.CreateAsync(model), "Evaluación guardada correctamente.");
+        if (saved)
+        {
+            photos.Clear();
+            previews.Clear();
+            notes = null;
+            consent = false;
+            await Load();
+        }
+    }
+
+    private async Task DeleteOne()
+    {
+        var target = toDelete;
+        toDelete = null;
+        if (target == null) return;
+        await Safe(async () => await Assessments.DeleteAsync(target.Id), "Evaluación eliminada.");
+        await Load();
+    }
+
+    private async Task DeleteAll()
+    {
+        confirmAll = false;
+        await Safe(async () => await Assessments.DeleteAllAsync(), "Se eliminaron todas tus evaluaciones y fotografías.");
+        await Load();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("gymCamera.stop"); }
+        catch (Exception ex) when (ex is JSDisconnectedException or InvalidOperationException or TaskCanceledException) { }
+    }
+}
