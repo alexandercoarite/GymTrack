@@ -5,37 +5,34 @@
 
 <PageTitle>Iniciar sesión · GymTrack</PageTitle>
 
-<div class="mx-auto max-w-md px-4 py-12">
-    <div class="card">
-        <h1 class="text-2xl font-extrabold">Iniciar sesión</h1>
-        <p class="mb-5 mt-1 text-sm text-gym-muted">Accede a tu panel de entrenamiento.</p>
+<AuthCard Title="Iniciar sesión" Subtitle="Accede a tu panel de entrenamiento.">
+<ChildContent>
+    <Alert Kind="error" Message="@error" />
 
-        <Alert Kind="error" Message="@error" />
-
-        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login" class="space-y-4">
-            <DataAnnotationsValidator />
-            <div>
-                <label for="identificador" class="label-gym">Correo electrónico o nombre de usuario</label>
-                <InputText id="identificador" @bind-Value="Input.Identificador" class="input-gym" autocomplete="username" />
-                <ValidationMessage For="() => Input.Identificador" />
-            </div>
-            <div>
-                <label for="password" class="label-gym">Contraseña</label>
-                <InputText id="password" type="password" @bind-Value="Input.Password" class="input-gym" autocomplete="current-password" />
-                <ValidationMessage For="() => Input.Password" />
-            </div>
-            <label class="flex items-center gap-2 text-sm text-gray-300">
-                <InputCheckbox @bind-Value="Input.Recordarme" /> Recordar mi sesión
-            </label>
-            <button type="submit" class="btn-primary w-full">Entrar</button>
-        </EditForm>
-
-        <div class="mt-5 flex justify-between text-sm">
-            <a href="/cuenta/recuperar" class="text-gym-accent hover:underline">¿Olvidaste tu contraseña?</a>
-            <a href="/cuenta/registro" class="text-gym-accent hover:underline">Crear cuenta</a>
+    <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login" class="space-y-4">
+        <DataAnnotationsValidator />
+        <div>
+            <label for="identificador" class="ui-label">Correo electrónico o nombre de usuario</label>
+            <InputText id="identificador" @bind-Value="Input.Identificador" class="ui-input" autocomplete="username" />
+            <ValidationMessage For="() => Input.Identificador" />
         </div>
+        <div>
+            <label for="password" class="ui-label">Contraseña</label>
+            <InputText id="password" type="password" @bind-Value="Input.Password" class="ui-input" autocomplete="current-password" />
+            <ValidationMessage For="() => Input.Password" />
+        </div>
+        <label class="flex items-center gap-2 text-sm text-stone-700">
+            <InputCheckbox @bind-Value="Input.Recordarme" /> Recordar mi sesión
+        </label>
+        <button type="submit" class="ui-btn ui-btn-primary w-full">Entrar</button>
+    </EditForm>
+
+    <div class="mt-5 flex justify-between text-sm">
+        <a href="/cuenta/recuperar" class="text-amber-700 hover:underline">¿Olvidaste tu contraseña?</a>
+        <a href="/cuenta/registro" class="text-amber-700 hover:underline">Crear cuenta</a>
     </div>
-</div>
+</ChildContent>
+</AuthCard>
 
 @code {
     private string? error;

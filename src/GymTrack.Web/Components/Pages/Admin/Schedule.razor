@@ -7,50 +7,50 @@
 <Alert Kind="error" Message="@Error" />
 <Alert Kind="success" Message="@Ok" />
 
-<section class="card">
+<section class="ui-panel">
     <h2 class="font-bold">Horario semanal</h2>
     @if (week == null)
     {
-        <p class="mt-3 text-gym-muted">Cargando…</p>
+        <p class="mt-3 text-stone-600">Cargando…</p>
     }
     else
     {
         <div class="mt-4 space-y-3">
             @foreach (var h in week)
             {
-                <div class="grid items-center gap-3 rounded-xl border border-gym-border p-3 md:grid-cols-4">
+                <div class="grid items-center gap-3 rounded-xl border border-stone-200 p-3 md:grid-cols-4">
                     <p class="font-semibold">@DayLabels.Of(h.Dia)</p>
                     <label class="flex items-center gap-2 text-sm">
                         <input type="checkbox" @bind="h.Abierto" /> Abierto
                     </label>
                     <div>
                         <label class="sr-only" for="ap-@h.Dia">Apertura @DayLabels.Of(h.Dia)</label>
-                        <input id="ap-@h.Dia" type="time" class="input-gym" @bind="h.Apertura" @bind:format="HH:mm" disabled="@(!h.Abierto)" />
+                        <input id="ap-@h.Dia" type="time" class="ui-input" @bind="h.Apertura" @bind:format="HH:mm" disabled="@(!h.Abierto)" />
                     </div>
                     <div>
                         <label class="sr-only" for="ci-@h.Dia">Cierre @DayLabels.Of(h.Dia)</label>
-                        <input id="ci-@h.Dia" type="time" class="input-gym" @bind="h.Cierre" @bind:format="HH:mm" disabled="@(!h.Abierto)" />
+                        <input id="ci-@h.Dia" type="time" class="ui-input" @bind="h.Cierre" @bind:format="HH:mm" disabled="@(!h.Abierto)" />
                     </div>
                 </div>
             }
         </div>
-        <p class="hint-gym">Desmarca «Abierto» para marcar un día de descanso.</p>
-        <button type="button" class="btn-primary mt-4" @onclick="SaveWeek" disabled="@Busy">Guardar horario semanal</button>
+        <p class="ui-hint">Desmarca «Abierto» para marcar un día de descanso.</p>
+        <button type="button" class="ui-btn ui-btn-primary mt-4" @onclick="SaveWeek" disabled="@Busy">Guardar horario semanal</button>
     }
 </section>
 
-<section class="card mt-6">
+<section class="ui-panel mt-6">
     <div class="flex items-center justify-between">
         <h2 class="font-bold">Horarios especiales y cierres temporales</h2>
-        <button type="button" class="btn-primary btn-sm" @onclick="NewSpecial">+ Nuevo</button>
+        <button type="button" class="ui-btn ui-btn-primary ui-btn-sm" @onclick="NewSpecial">+ Nuevo</button>
     </div>
     @if (special.Count == 0)
     {
-        <p class="mt-3 text-sm text-gym-muted">No hay horarios especiales registrados.</p>
+        <p class="mt-3 text-sm text-stone-600">No hay horarios especiales registrados.</p>
     }
     else
     {
-        <table class="table-gym mt-3">
+        <table class="ui-table mt-3">
             <thead><tr><th>Fecha</th><th>Descripción</th><th>Horario</th><th></th></tr></thead>
             <tbody>
                 @foreach (var s in special)
@@ -63,11 +63,11 @@
                             {
                                 @($"{s.Apertura:HH\\:mm} – {s.Cierre:HH\\:mm}")
                             }
-                            else { <span class="text-gym-danger">Cerrado</span> }
+                            else { <span class="text-red-600">Cerrado</span> }
                         </td>
                         <td class="text-right">
-                            <button type="button" class="btn-ghost btn-sm" @onclick="() => EditSpecial(s)">Editar</button>
-                            <button type="button" class="btn-danger btn-sm" @onclick="() => toDelete = s">Eliminar</button>
+                            <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="() => EditSpecial(s)">Editar</button>
+                            <button type="button" class="ui-btn ui-btn-danger ui-btn-sm" @onclick="() => toDelete = s">Eliminar</button>
                         </td>
                     </tr>
                 }
@@ -81,25 +81,25 @@
         <DataAnnotationsValidator />
         <Alert Kind="error" Message="@Error" />
         <div>
-            <label for="fecha" class="label-gym">Fecha</label>
-            <input id="fecha" type="date" class="input-gym" @bind="form.Fecha" />
+            <label for="fecha" class="ui-label">Fecha</label>
+            <input id="fecha" type="date" class="ui-input" @bind="form.Fecha" />
         </div>
         <div>
-            <label for="desc" class="label-gym">Descripción</label>
-            <InputText id="desc" @bind-Value="form.Descripcion" class="input-gym" placeholder="Ej.: Feriado, mantenimiento general…" />
+            <label for="desc" class="ui-label">Descripción</label>
+            <InputText id="desc" @bind-Value="form.Descripcion" class="ui-input" placeholder="Ej.: Feriado, mantenimiento general…" />
             <ValidationMessage For="() => form.Descripcion" />
         </div>
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" @bind="form.Abierto" /> El gimnasio abre ese día</label>
         @if (form.Abierto)
         {
             <div class="grid gap-3 md:grid-cols-2">
-                <div><label for="sa" class="label-gym">Apertura</label><input id="sa" type="time" class="input-gym" @bind="form.Apertura" @bind:format="HH:mm" /></div>
-                <div><label for="sc" class="label-gym">Cierre</label><input id="sc" type="time" class="input-gym" @bind="form.Cierre" @bind:format="HH:mm" /></div>
+                <div><label for="sa" class="ui-label">Apertura</label><input id="sa" type="time" class="ui-input" @bind="form.Apertura" @bind:format="HH:mm" /></div>
+                <div><label for="sc" class="ui-label">Cierre</label><input id="sc" type="time" class="ui-input" @bind="form.Cierre" @bind:format="HH:mm" /></div>
             </div>
         }
         <div class="flex justify-end gap-2">
-            <button type="button" class="btn-ghost" @onclick="() => showForm = false">Cancelar</button>
-            <button type="submit" class="btn-primary" disabled="@Busy">Guardar</button>
+            <button type="button" class="ui-btn ui-btn-soft" @onclick="() => showForm = false">Cancelar</button>
+            <button type="submit" class="ui-btn ui-btn-primary" disabled="@Busy">Guardar</button>
         </div>
     </EditForm>
 </Modal>

@@ -1,6 +1,6 @@
-<button type="button" class="card fade-in w-full text-left transition hover:border-gym-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-gym-accent @(Machine.Estado != MachineStatus.Disponible ? "opacity-80" : "")"
+<button type="button" class="ui-panel fade-in w-full text-left transition hover:border-amber-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-700 @(Machine.Estado != MachineStatus.Disponible ? "opacity-80" : "")"
         @onclick="() => OnSelect.InvokeAsync(Machine)">
-    <div class="mb-4 flex h-36 items-center justify-center overflow-hidden rounded-xl bg-gym-dark">
+    <div class="mb-4 flex h-36 items-center justify-center overflow-hidden rounded-xl bg-stone-100">
         @if (!string.IsNullOrWhiteSpace(Machine.ImagenRuta))
         {
             <img src="@Machine.ImagenRuta" alt="@Machine.Nombre" class="h-full w-full object-cover" loading="lazy" />
@@ -14,8 +14,8 @@
         <h3 class="font-bold leading-tight">@Machine.Nombre</h3>
         <StatusBadge Status="Machine.Estado" />
     </div>
-    <p class="mt-1 text-xs text-gym-muted">@Machine.GrupoMuscular · @Machine.Tipo.Label()</p>
-    <p class="mt-2 line-clamp-2 text-sm text-gray-300">@Machine.Descripcion</p>
+    <p class="mt-1 text-xs text-stone-600">@Machine.GrupoMuscular · @Machine.Tipo.Label()</p>
+    <p class="mt-2 line-clamp-2 text-sm text-stone-700">@Machine.Descripcion</p>
 </button>
 
 @code {

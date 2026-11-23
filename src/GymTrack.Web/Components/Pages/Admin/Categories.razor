@@ -8,25 +8,25 @@
 <Alert Kind="success" Message="@Ok" />
 
 <div class="grid gap-6 lg:grid-cols-2">
-    <section class="card">
+    <section class="ui-panel">
         <div class="mb-3 flex items-center justify-between">
             <h2 class="font-bold">Categorías de máquinas</h2>
-            <button type="button" class="btn-primary btn-sm" @onclick="() => New(Kind.Category)">+ Nueva</button>
+            <button type="button" class="ui-btn ui-btn-primary ui-btn-sm" @onclick="() => New(Kind.Category)">+ Nueva</button>
         </div>
-        @if (categories.Count == 0) { <p class="text-sm text-gym-muted">No hay categorías.</p> }
+        @if (categories.Count == 0) { <p class="text-sm text-stone-600">No hay categorías.</p> }
         else
         {
-            <table class="table-gym">
+            <table class="ui-table">
                 <thead><tr><th>Nombre</th><th>Máquinas</th><th></th></tr></thead>
                 <tbody>
                     @foreach (var c in categories)
                     {
                         <tr>
-                            <td><p class="font-semibold">@c.Nombre</p><p class="text-xs text-gym-muted">@c.Descripcion</p></td>
+                            <td><p class="font-semibold">@c.Nombre</p><p class="text-xs text-stone-600">@c.Descripcion</p></td>
                             <td>@c.Usos</td>
                             <td class="text-right">
-                                <button type="button" class="btn-ghost btn-sm" @onclick="() => Edit(Kind.Category, c)">Editar</button>
-                                <button type="button" class="btn-danger btn-sm" @onclick="() => Ask(Kind.Category, c)">Eliminar</button>
+                                <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="() => Edit(Kind.Category, c)">Editar</button>
+                                <button type="button" class="ui-btn ui-btn-danger ui-btn-sm" @onclick="() => Ask(Kind.Category, c)">Eliminar</button>
                             </td>
                         </tr>
                     }
@@ -35,15 +35,15 @@
         }
     </section>
 
-    <section class="card">
+    <section class="ui-panel">
         <div class="mb-3 flex items-center justify-between">
             <h2 class="font-bold">Grupos musculares</h2>
-            <button type="button" class="btn-primary btn-sm" @onclick="() => New(Kind.Group)">+ Nuevo</button>
+            <button type="button" class="ui-btn ui-btn-primary ui-btn-sm" @onclick="() => New(Kind.Group)">+ Nuevo</button>
         </div>
-        @if (groups.Count == 0) { <p class="text-sm text-gym-muted">No hay grupos musculares.</p> }
+        @if (groups.Count == 0) { <p class="text-sm text-stone-600">No hay grupos musculares.</p> }
         else
         {
-            <table class="table-gym">
+            <table class="ui-table">
                 <thead><tr><th>Nombre</th><th>Máquinas y ejercicios</th><th></th></tr></thead>
                 <tbody>
                     @foreach (var g in groups)
@@ -52,8 +52,8 @@
                             <td class="font-semibold">@g.Nombre</td>
                             <td>@g.Usos</td>
                             <td class="text-right">
-                                <button type="button" class="btn-ghost btn-sm" @onclick="() => Edit(Kind.Group, g)">Editar</button>
-                                <button type="button" class="btn-danger btn-sm" @onclick="() => Ask(Kind.Group, g)">Eliminar</button>
+                                <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="() => Edit(Kind.Group, g)">Editar</button>
+                                <button type="button" class="ui-btn ui-btn-danger ui-btn-sm" @onclick="() => Ask(Kind.Group, g)">Eliminar</button>
                             </td>
                         </tr>
                     }
@@ -68,21 +68,21 @@
         <DataAnnotationsValidator />
         <Alert Kind="error" Message="@Error" />
         <div>
-            <label for="nombre" class="label-gym">Nombre</label>
-            <InputText id="nombre" @bind-Value="model.Nombre" class="input-gym" />
+            <label for="nombre" class="ui-label">Nombre</label>
+            <InputText id="nombre" @bind-Value="model.Nombre" class="ui-input" />
             <ValidationMessage For="() => model.Nombre" />
         </div>
         @if (kind == Kind.Category)
         {
             <div>
-                <label for="desc" class="label-gym">Descripción (opcional)</label>
-                <InputTextArea id="desc" @bind-Value="model.Descripcion" rows="2" class="input-gym" />
+                <label for="desc" class="ui-label">Descripción (opcional)</label>
+                <InputTextArea id="desc" @bind-Value="model.Descripcion" rows="2" class="ui-input" />
                 <ValidationMessage For="() => model.Descripcion" />
             </div>
         }
         <div class="flex justify-end gap-2">
-            <button type="button" class="btn-ghost" @onclick="() => showForm = false">Cancelar</button>
-            <button type="submit" class="btn-primary" disabled="@Busy">Guardar</button>
+            <button type="button" class="ui-btn ui-btn-soft" @onclick="() => showForm = false">Cancelar</button>
+            <button type="submit" class="ui-btn ui-btn-primary" disabled="@Busy">Guardar</button>
         </div>
     </EditForm>
 </Modal>

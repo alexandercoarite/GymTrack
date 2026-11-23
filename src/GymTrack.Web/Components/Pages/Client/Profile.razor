@@ -11,79 +11,79 @@
 
 @if (model == null)
 {
-    <p class="text-gym-muted">Cargando…</p>
+    <p class="text-stone-600">Cargando…</p>
 }
 else
 {
     <div class="grid gap-6 lg:grid-cols-2">
-        <section class="card">
+        <section class="ui-panel">
             <h2 class="font-bold">Datos personales</h2>
             <EditForm Model="model" OnValidSubmit="SaveProfile" class="mt-4 space-y-3">
                 <DataAnnotationsValidator />
                 <div class="grid gap-3 md:grid-cols-2">
-                    <div><label class="label-gym">Correo</label><input class="input-gym opacity-70" value="@model.Email" disabled /></div>
-                    <div><label class="label-gym">Usuario</label><input class="input-gym opacity-70" value="@model.UserName" disabled /></div>
+                    <div><label class="ui-label">Correo</label><input class="ui-input opacity-70" value="@model.Email" disabled /></div>
+                    <div><label class="ui-label">Usuario</label><input class="ui-input opacity-70" value="@model.UserName" disabled /></div>
                 </div>
                 <div class="grid gap-3 md:grid-cols-2">
                     <div>
-                        <label for="nombre" class="label-gym">Nombre</label>
-                        <InputText id="nombre" @bind-Value="model.Nombre" class="input-gym" />
+                        <label for="nombre" class="ui-label">Nombre</label>
+                        <InputText id="nombre" @bind-Value="model.Nombre" class="ui-input" />
                         <ValidationMessage For="() => model.Nombre" />
                     </div>
                     <div>
-                        <label for="apellido" class="label-gym">Apellido</label>
-                        <InputText id="apellido" @bind-Value="model.Apellido" class="input-gym" />
+                        <label for="apellido" class="ui-label">Apellido</label>
+                        <InputText id="apellido" @bind-Value="model.Apellido" class="ui-input" />
                         <ValidationMessage For="() => model.Apellido" />
                     </div>
                 </div>
                 <div class="grid gap-3 md:grid-cols-2">
                     <div>
-                        <label for="tel" class="label-gym">Teléfono</label>
-                        <InputText id="tel" @bind-Value="model.Telefono" class="input-gym" />
+                        <label for="tel" class="ui-label">Teléfono</label>
+                        <InputText id="tel" @bind-Value="model.Telefono" class="ui-input" />
                         <ValidationMessage For="() => model.Telefono" />
                     </div>
                     <div>
-                        <label for="nac" class="label-gym">Fecha de nacimiento</label>
-                        <InputDate id="nac" @bind-Value="model.FechaNacimiento" class="input-gym" />
+                        <label for="nac" class="ui-label">Fecha de nacimiento</label>
+                        <InputDate id="nac" @bind-Value="model.FechaNacimiento" class="ui-input" />
                     </div>
                 </div>
-                <button type="submit" class="btn-primary" disabled="@Busy">Guardar cambios</button>
+                <button type="submit" class="ui-btn ui-btn-primary" disabled="@Busy">Guardar cambios</button>
             </EditForm>
         </section>
 
-        <section class="card">
+        <section class="ui-panel">
             <h2 class="font-bold">Cambiar contraseña</h2>
             <EditForm Model="pwd" OnValidSubmit="ChangePassword" class="mt-4 space-y-3">
                 <DataAnnotationsValidator />
                 <div>
-                    <label for="actual" class="label-gym">Contraseña actual</label>
-                    <InputText id="actual" type="password" @bind-Value="pwd.Actual" class="input-gym" autocomplete="current-password" />
+                    <label for="actual" class="ui-label">Contraseña actual</label>
+                    <InputText id="actual" type="password" @bind-Value="pwd.Actual" class="ui-input" autocomplete="current-password" />
                     <ValidationMessage For="() => pwd.Actual" />
                 </div>
                 <div>
-                    <label for="nueva" class="label-gym">Contraseña nueva</label>
-                    <InputText id="nueva" type="password" @bind-Value="pwd.Nueva" class="input-gym" autocomplete="new-password" />
+                    <label for="nueva" class="ui-label">Contraseña nueva</label>
+                    <InputText id="nueva" type="password" @bind-Value="pwd.Nueva" class="ui-input" autocomplete="new-password" />
                     <ValidationMessage For="() => pwd.Nueva" />
                 </div>
                 <div>
-                    <label for="confirmar" class="label-gym">Confirmar contraseña nueva</label>
-                    <InputText id="confirmar" type="password" @bind-Value="pwd.Confirmar" class="input-gym" autocomplete="new-password" />
+                    <label for="confirmar" class="ui-label">Confirmar contraseña nueva</label>
+                    <InputText id="confirmar" type="password" @bind-Value="pwd.Confirmar" class="ui-input" autocomplete="new-password" />
                     <ValidationMessage For="() => pwd.Confirmar" />
                 </div>
-                <p class="hint-gym">Por seguridad, al cambiar la contraseña tus sesiones abiertas se cerrarán y tendrás que iniciar sesión de nuevo.</p>
-                <button type="submit" class="btn-primary" disabled="@Busy">Cambiar contraseña</button>
+                <p class="ui-hint">Por seguridad, al cambiar la contraseña tus sesiones abiertas se cerrarán y tendrás que iniciar sesión de nuevo.</p>
+                <button type="submit" class="ui-btn ui-btn-primary" disabled="@Busy">Cambiar contraseña</button>
             </EditForm>
         </section>
     </div>
 
-    <section class="card mt-6">
+    <section class="ui-panel mt-6">
         <h2 class="font-bold">Privacidad y datos</h2>
-        <p class="mt-1 text-sm text-gray-300">Puedes eliminar tus datos sensibles cuando quieras. Estas acciones son permanentes.</p>
+        <p class="mt-1 text-sm text-stone-700">Puedes eliminar tus datos sensibles cuando quieras. Estas acciones son permanentes.</p>
         <div class="mt-4 flex flex-wrap gap-3">
-            <button type="button" class="btn-danger" @onclick="() => confirm = PendingAction.Photos">Eliminar evaluaciones y fotografías</button>
-            <button type="button" class="btn-danger" @onclick="() => confirm = PendingAction.Progress">Eliminar mi historial de progreso</button>
+            <button type="button" class="ui-btn ui-btn-danger" @onclick="() => confirm = PendingAction.Photos">Eliminar evaluaciones y fotografías</button>
+            <button type="button" class="ui-btn ui-btn-danger" @onclick="() => confirm = PendingAction.Progress">Eliminar mi historial de progreso</button>
         </div>
-        <p class="hint-gym">Para eliminar tu cuenta completa, solicítalo al personal del gimnasio.</p>
+        <p class="ui-hint">Para eliminar tu cuenta completa, solicítalo al personal del gimnasio.</p>
     </section>
 }
 

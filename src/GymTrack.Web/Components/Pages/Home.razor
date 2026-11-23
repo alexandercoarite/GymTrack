@@ -6,39 +6,39 @@
 <PageTitle>@Info.Value.Name · Gestión inteligente para tu gimnasio</PageTitle>
 
 <!-- Sección principal -->
-<section class="relative overflow-hidden border-b border-gym-border bg-gradient-to-br from-gym-black via-gym-dark to-black">
+<section class="relative overflow-hidden border-b border-stone-200 bg-linear-to-br from-stone-50 via-amber-50/60 to-stone-100">
     <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
         <div class="fade-in">
-            <p class="mb-3 inline-block rounded-full border border-gym-accent/40 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-gym-accent">Entrena con datos</p>
+            <p class="mb-3 inline-block rounded-full border border-amber-700/40 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-700">Entrena con datos</p>
             <h1 class="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
-                Tu progreso, <span class="text-gym-accent">medido</span> y guiado.
+                Tu progreso, <span class="text-amber-700">medido</span> y guiado.
             </h1>
-            <p class="mt-5 max-w-xl text-lg text-gray-300">
+            <p class="mt-5 max-w-xl text-lg text-stone-700">
                 @Info.Value.Name combina un cuestionario personalizado, rutinas basadas en las máquinas que realmente tenemos
                 y el seguimiento de tu evolución en un solo lugar.
             </p>
             <div class="mt-8 flex flex-wrap gap-3">
-                <a href="/cuenta/registro" class="btn-primary">Crear mi cuenta</a>
-                <a href="/cuenta/iniciar-sesion" class="btn-ghost">Iniciar sesión</a>
+                <a href="/cuenta/registro" class="ui-btn ui-btn-primary">Crear mi cuenta</a>
+                <a href="/cuenta/iniciar-sesion" class="ui-btn ui-btn-soft">Iniciar sesión</a>
             </div>
             @if (status != null)
             {
-                <p class="mt-6 flex items-center gap-2 text-sm text-gray-300">
-                    <span class="inline-block h-2.5 w-2.5 rounded-full @(status.AbiertoAhora ? "bg-gym-accent" : "bg-gym-danger")"></span>
+                <p class="mt-6 flex items-center gap-2 text-sm text-stone-700">
+                    <span class="inline-block h-2.5 w-2.5 rounded-full @(status.AbiertoAhora ? "bg-amber-700" : "bg-red-600")"></span>
                     @status.Mensaje
                 </p>
             }
         </div>
 
         <div class="fade-in flex justify-center" aria-hidden="true">
-            <svg viewBox="0 0 320 220" class="w-full max-w-md" fill="none" stroke="#39ff14" stroke-width="6" stroke-linecap="round">
-                <rect x="30" y="80" width="22" height="60" rx="5" fill="#1a1f26" />
-                <rect x="58" y="62" width="26" height="96" rx="6" fill="#1a1f26" />
-                <rect x="236" y="62" width="26" height="96" rx="6" fill="#1a1f26" />
-                <rect x="268" y="80" width="22" height="60" rx="5" fill="#1a1f26" />
+            <svg viewBox="0 0 320 220" class="w-full max-w-md" fill="none" stroke="#b45309" stroke-width="6" stroke-linecap="round">
+                <rect x="30" y="80" width="22" height="60" rx="5" fill="#fef3c7" />
+                <rect x="58" y="62" width="26" height="96" rx="6" fill="#fef3c7" />
+                <rect x="236" y="62" width="26" height="96" rx="6" fill="#fef3c7" />
+                <rect x="268" y="80" width="22" height="60" rx="5" fill="#fef3c7" />
                 <line x1="84" y1="110" x2="236" y2="110" />
-                <circle cx="160" cy="110" r="10" fill="#39ff14" stroke="none" />
-                <path d="M30 190 H290" stroke="#2a313a" stroke-width="3" />
+                <circle cx="160" cy="110" r="10" fill="#b45309" stroke="none" />
+                <path d="M30 190 H290" stroke="#d6d3d1" stroke-width="3" />
             </svg>
         </div>
     </div>
@@ -47,29 +47,29 @@
 <!-- Servicios -->
 <section id="servicios" class="mx-auto max-w-6xl px-4 py-16">
     <h2 class="text-3xl font-extrabold">Servicios del gimnasio</h2>
-    <p class="mt-2 text-gym-muted">Todo lo que necesitas para entrenar con constancia.</p>
+    <p class="mt-2 text-stone-600">Todo lo que necesitas para entrenar con constancia.</p>
     <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach (var s in services)
         {
-            <div class="card fade-in">
+            <div class="ui-panel fade-in">
                 <p class="text-3xl" aria-hidden="true">@s.Icon</p>
                 <h3 class="mt-3 font-bold">@s.Title</h3>
-                <p class="mt-1 text-sm text-gray-300">@s.Text</p>
+                <p class="mt-1 text-sm text-stone-700">@s.Text</p>
             </div>
         }
     </div>
 </section>
 
 <!-- Beneficios -->
-<section class="border-y border-gym-border bg-gym-dark">
+<section class="border-y border-stone-200 bg-stone-100">
     <div class="mx-auto max-w-6xl px-4 py-16">
         <h2 class="text-3xl font-extrabold">Beneficios de usar la plataforma</h2>
         <div class="mt-8 grid gap-4 md:grid-cols-3">
             @foreach (var b in benefits)
             {
-                <div class="rounded-2xl border border-gym-border p-5">
-                    <h3 class="font-bold text-gym-accent">@b.Title</h3>
-                    <p class="mt-2 text-sm text-gray-300">@b.Text</p>
+                <div class="rounded-2xl border border-stone-200 p-5">
+                    <h3 class="font-bold text-amber-700">@b.Title</h3>
+                    <p class="mt-2 text-sm text-stone-700">@b.Text</p>
                 </div>
             }
         </div>
@@ -79,14 +79,14 @@
 <!-- Máquinas -->
 <section id="maquinas" class="mx-auto max-w-6xl px-4 py-16">
     <h2 class="text-3xl font-extrabold">Nuestras máquinas</h2>
-    <p class="mt-2 text-gym-muted">Consulta el equipo disponible y su estado actual.</p>
+    <p class="mt-2 text-stone-600">Consulta el equipo disponible y su estado actual.</p>
     @if (machines == null)
     {
-        <p class="mt-6 text-gym-muted">Cargando máquinas…</p>
+        <p class="mt-6 text-stone-600">Cargando máquinas…</p>
     }
     else if (machines.Count == 0)
     {
-        <p class="mt-6 text-gym-muted">Pronto publicaremos el catálogo de máquinas.</p>
+        <p class="mt-6 text-stone-600">Pronto publicaremos el catálogo de máquinas.</p>
     }
     else
     {
@@ -101,18 +101,18 @@
 <MachineDetail Machine="selected" OnClose="Close" />
 
 <!-- Horarios -->
-<section id="horarios" class="border-y border-gym-border bg-gym-dark">
+<section id="horarios" class="border-y border-stone-200 bg-stone-100">
     <div class="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-2">
         <div>
             <h2 class="text-3xl font-extrabold">Horarios de atención</h2>
-            <div class="card mt-6">
+            <div class="ui-panel mt-6">
                 @if (week == null)
                 {
-                    <p class="text-gym-muted">Cargando…</p>
+                    <p class="text-stone-600">Cargando…</p>
                 }
                 else
                 {
-                    <table class="table-gym">
+                    <table class="ui-table">
                         <tbody>
                             @foreach (var d in week)
                             {
@@ -125,7 +125,7 @@
                                         }
                                         else
                                         {
-                                            <span class="text-gym-muted">Cerrado</span>
+                                            <span class="text-stone-600">Cerrado</span>
                                         }
                                     </td>
                                 </tr>
@@ -139,16 +139,16 @@
             <h3 class="text-xl font-bold">Horarios especiales</h3>
             @if (special == null || special.Count == 0)
             {
-                <p class="mt-4 text-sm text-gym-muted">No hay cierres ni horarios especiales programados.</p>
+                <p class="mt-4 text-sm text-stone-600">No hay cierres ni horarios especiales programados.</p>
             }
             else
             {
                 <ul class="mt-4 space-y-3">
                     @foreach (var s in special)
                     {
-                        <li class="card py-3">
+                        <li class="ui-panel py-3">
                             <p class="font-semibold">@s.Fecha.ToString("dddd d 'de' MMMM", CultureInfo.GetCultureInfo("es"))</p>
-                            <p class="text-sm text-gray-300">
+                            <p class="text-sm text-stone-700">
                                 @s.Descripcion ·
                                 @if (s.Abierto && s.Apertura != null && s.Cierre != null)
                                 {
@@ -156,7 +156,7 @@
                                 }
                                 else
                                 {
-                                    <span class="text-gym-danger">Cerrado</span>
+                                    <span class="text-red-600">Cerrado</span>
                                 }
                             </p>
                         </li>
@@ -171,9 +171,9 @@
 <section id="contacto" class="mx-auto max-w-6xl px-4 py-16">
     <h2 class="text-3xl font-extrabold">Contacto y ubicación</h2>
     <div class="mt-8 grid gap-4 md:grid-cols-3">
-        <div class="card"><p class="text-xs uppercase tracking-wide text-gym-muted">Dirección</p><p class="mt-1">@Info.Value.Address</p></div>
-        <div class="card"><p class="text-xs uppercase tracking-wide text-gym-muted">Teléfono</p><p class="mt-1">@Info.Value.Phone</p></div>
-        <div class="card"><p class="text-xs uppercase tracking-wide text-gym-muted">Correo</p><p class="mt-1">@Info.Value.Email</p></div>
+        <div class="ui-panel"><p class="text-xs uppercase tracking-wide text-stone-600">Dirección</p><p class="mt-1">@Info.Value.Address</p></div>
+        <div class="ui-panel"><p class="text-xs uppercase tracking-wide text-stone-600">Teléfono</p><p class="mt-1">@Info.Value.Phone</p></div>
+        <div class="ui-panel"><p class="text-xs uppercase tracking-wide text-stone-600">Correo</p><p class="mt-1">@Info.Value.Email</p></div>
     </div>
 </section>
 

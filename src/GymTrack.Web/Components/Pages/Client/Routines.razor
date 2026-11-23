@@ -4,8 +4,8 @@
 <PageTitle>Mis rutinas · GymTrack</PageTitle>
 
 <PageHeader Title="Mis rutinas" Subtitle="Rutinas generadas con tus respuestas y las máquinas disponibles hoy.">
-    <a href="/app/cuestionario" class="btn-ghost">Editar cuestionario</a>
-    <button type="button" class="btn-primary" @onclick="Regenerate" disabled="@Busy">@(Busy ? "Generando…" : "Actualizar rutina")</button>
+    <a href="/app/cuestionario" class="ui-btn ui-btn-soft">Editar cuestionario</a>
+    <button type="button" class="ui-btn ui-btn-primary" @onclick="Regenerate" disabled="@Busy">@(Busy ? "Generando…" : "Actualizar rutina")</button>
 </PageHeader>
 
 <Alert Kind="error" Message="@Error" />
@@ -13,35 +13,35 @@
 
 @if (!loaded)
 {
-    <p class="text-gym-muted">Cargando…</p>
+    <p class="text-stone-600">Cargando…</p>
 }
 else if (active == null)
 {
-    <div class="card">
-        <p class="text-gray-300">Aún no tienes una rutina. Completa el cuestionario para generarla.</p>
-        <a href="/app/cuestionario" class="btn-primary mt-4">Ir al cuestionario</a>
+    <div class="ui-panel">
+        <p class="text-stone-700">Aún no tienes una rutina. Completa el cuestionario para generarla.</p>
+        <a href="/app/cuestionario" class="ui-btn ui-btn-primary mt-4">Ir al cuestionario</a>
     </div>
 }
 else
 {
-    <section class="card mb-6">
+    <section class="ui-panel mb-6">
         <h2 class="text-xl font-bold">@active.Nombre</h2>
         <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-            <div><dt class="text-gym-muted">Objetivo</dt><dd>@active.Objetivo.Label()</dd></div>
-            <div><dt class="text-gym-muted">Dificultad</dt><dd>@active.Nivel.Label()</dd></div>
-            <div><dt class="text-gym-muted">Días de entrenamiento</dt><dd>@active.Dias por semana</dd></div>
-            <div><dt class="text-gym-muted">Tiempo estimado</dt><dd>~@active.TiempoEstimadoMin min por sesión</dd></div>
-            <div class="sm:col-span-2 lg:col-span-4"><dt class="text-gym-muted">Grupos musculares</dt><dd>@active.GruposMusculares</dd></div>
+            <div><dt class="text-stone-600">Objetivo</dt><dd>@active.Objetivo.Label()</dd></div>
+            <div><dt class="text-stone-600">Dificultad</dt><dd>@active.Nivel.Label()</dd></div>
+            <div><dt class="text-stone-600">Días de entrenamiento</dt><dd>@active.Dias por semana</dd></div>
+            <div><dt class="text-stone-600">Tiempo estimado</dt><dd>~@active.TiempoEstimadoMin min por sesión</dd></div>
+            <div class="sm:col-span-2 lg:col-span-4"><dt class="text-stone-600">Grupos musculares</dt><dd>@active.GruposMusculares</dd></div>
         </dl>
     </section>
 
     <div class="grid gap-4 lg:grid-cols-2">
         @foreach (var day in active.Ejercicios.GroupBy(e => e.Dia).OrderBy(g => g.Key))
         {
-            <section class="card fade-in">
-                <h3 class="font-bold text-gym-accent">Día @day.Key</h3>
+            <section class="ui-panel fade-in">
+                <h3 class="font-bold text-amber-700">Día @day.Key</h3>
                 <div class="mt-3 overflow-x-auto">
-                    <table class="table-gym">
+                    <table class="ui-table">
                         <thead>
                             <tr><th>Ejercicio</th><th>Series × reps</th><th>Descanso</th></tr>
                         </thead>
@@ -51,7 +51,7 @@ else
                                 <tr>
                                     <td>
                                         <p class="font-semibold">@e.Ejercicio</p>
-                                        <p class="text-xs text-gym-muted">@e.GrupoMuscular@(e.Maquina != null ? $" · {e.Maquina}" : " · sin máquina")</p>
+                                        <p class="text-xs text-stone-600">@e.GrupoMuscular@(e.Maquina != null ? $" · {e.Maquina}" : " · sin máquina")</p>
                                     </td>
                                     <td>@(e.Series > 1 ? $"{e.Series} × {e.Repeticiones}" : e.Repeticiones)</td>
                                     <td>@(e.DescansoSeg > 0 ? $"{e.DescansoSeg} s" : "—")</td>
@@ -64,9 +64,9 @@ else
         }
     </div>
 
-    <section class="card mt-6">
+    <section class="ui-panel mt-6">
         <h2 class="font-bold">Recomendaciones generales</h2>
-        <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-gray-300">
+        <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-stone-700">
             @foreach (var line in active.Recomendaciones.Split('\n', StringSplitOptions.RemoveEmptyEntries))
             {
                 <li>@line</li>
@@ -77,14 +77,14 @@ else
 
 @if (history.Count > 1)
 {
-    <section class="card mt-6">
+    <section class="ui-panel mt-6">
         <h2 class="font-bold">Historial de rutinas</h2>
-        <ul class="mt-3 divide-y divide-gym-border text-sm">
+        <ul class="mt-3 divide-y divide-stone-200 text-sm">
             @foreach (var r in history)
             {
                 <li class="flex flex-wrap items-center justify-between gap-2 py-2">
                     <span>@r.Nombre</span>
-                    <span class="text-gym-muted">
+                    <span class="text-stone-600">
                         @r.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy") ·
                         <span class="badge @(r.Estado == PlanStatus.Activo ? "badge-ok" : "badge-neutral")">@r.Estado.Label()</span>
                     </span>

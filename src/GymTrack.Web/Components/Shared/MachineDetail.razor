@@ -2,7 +2,7 @@
     @if (Machine != null)
     {
         <div class="grid gap-4 md:grid-cols-2">
-            <div class="flex h-56 items-center justify-center overflow-hidden rounded-xl bg-gym-dark">
+            <div class="flex h-56 items-center justify-center overflow-hidden rounded-xl bg-stone-100">
                 @if (!string.IsNullOrWhiteSpace(Machine.ImagenRuta))
                 {
                     <img src="@Machine.ImagenRuta" alt="@Machine.Nombre" class="h-full w-full object-cover" />
@@ -14,14 +14,14 @@
             </div>
             <div class="space-y-2 text-sm">
                 <p><StatusBadge Status="Machine.Estado" /></p>
-                <p><span class="text-gym-muted">Categoría:</span> @Machine.Categoria</p>
-                <p><span class="text-gym-muted">Grupo muscular:</span> @Machine.GrupoMuscular</p>
-                <p><span class="text-gym-muted">Tipo de entrenamiento:</span> @Machine.Tipo.Label()</p>
-                <p class="text-gray-300">@Machine.Descripcion</p>
+                <p><span class="text-stone-600">Categoría:</span> @Machine.Categoria</p>
+                <p><span class="text-stone-600">Grupo muscular:</span> @Machine.GrupoMuscular</p>
+                <p><span class="text-stone-600">Tipo de entrenamiento:</span> @Machine.Tipo.Label()</p>
+                <p class="text-stone-700">@Machine.Descripcion</p>
             </div>
         </div>
         <h3 class="mt-5 font-bold">Instrucciones básicas de uso</h3>
-        <p class="mt-1 whitespace-pre-line text-sm text-gray-300">
+        <p class="mt-1 whitespace-pre-line text-sm text-stone-700">
             @(string.IsNullOrWhiteSpace(Machine.Instrucciones) ? "Consulta al personal del gimnasio si tienes dudas sobre su uso." : Machine.Instrucciones)
         </p>
     }

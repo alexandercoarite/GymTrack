@@ -12,7 +12,7 @@ usuarios, horarios y mantenimiento).
 ## Requisitos
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [Node.js 20+](https://nodejs.org) para regenerar Tailwind. Ejecuta `npm install` dentro de `src/GymTrack.Web`. La aplicación usa su hoja base si Tailwind aún no se ha generado.
+- [Node.js 20+](https://nodejs.org) para regenerar Tailwind. Ejecuta `npm install` y `npm run css:build` dentro de `src/GymTrack.Web`. El CSS compilado se incluye en el proyecto.
 - Herramienta de EF Core: `dotnet tool install --global dotnet-ef`
 
 ## Estructura
@@ -31,6 +31,12 @@ GymTrack/
 Los componentes Blazor solo llaman a interfaces (`IMachineService`, `IRoutineService`...). Cada servicio crea un
 `DbContext` corto por operación (fábrica), que es lo recomendable en Blazor Server.
 
+
+## Plantilla Sharpness Sharp
+
+La portada, el área de cuenta y los paneles de cliente y administración comparten los estilos y componentes de Sharpness Sharp. El área de cuenta usa `AuthLayout` y el componente `AuthCard` de la plantilla. Los colores del gimnasio se integran en el tema de piedra y ámbar.
+
+`Program.cs` delega la autenticación a `UseAuth`, que registra SQLite a través de `UseDB`. `UseAPIEndpoints` descubre los módulos que implementan `IEndpoints` y `SeedAuth` ejecuta la inicialización de GymTrack. Los componentes Blazor Server invocan los servicios del proyecto directamente.
 ## Primer arranque
 
 ```bash
@@ -65,7 +71,7 @@ Para cambios posteriores: `./scripts/crear-migracion.sh NombreDelCambio`.
 
 | Clave | Uso |
 |---|---|
-| `ConnectionStrings:DefaultConnection` | Archivo SQLite (`Data Source=App_Data/gymtrack.db`) |
+| `Database:Source` | Archivo SQLite (`App_Data/gymtrack.db`). `ConnectionStrings:DefaultConnection` sigue teniendo prioridad si está configurada. |
 | `Storage:PrivatePhotosPath` | Carpeta privada de fotografías corporales (fuera de `wwwroot`) |
 | `Gym:*` | Nombre, dirección, teléfono, correo y zona horaria (`America/La_Paz`) del gimnasio |
 | `InitialAdmin:*` | Administrador inicial: usa **user-secrets** o variables de entorno (`InitialAdmin__Password`) |

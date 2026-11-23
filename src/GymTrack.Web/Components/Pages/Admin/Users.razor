@@ -7,23 +7,23 @@
 <Alert Kind="error" Message="@Error" />
 <Alert Kind="success" Message="@Ok" />
 
-<div class="card mb-4">
-    <label for="buscar" class="label-gym">Buscar por nombre, usuario o correo</label>
-    <input id="buscar" class="input-gym" placeholder="Escribe para buscar…" @bind="text" @bind:event="oninput" @bind:after="Load" />
+<div class="ui-panel mb-4">
+    <label for="buscar" class="ui-label">Buscar por nombre, usuario o correo</label>
+    <input id="buscar" class="ui-input" placeholder="Escribe para buscar…" @bind="text" @bind:event="oninput" @bind:after="Load" />
 </div>
 
-<div class="card overflow-x-auto">
+<div class="ui-panel overflow-x-auto">
     @if (items == null)
     {
-        <p class="text-gym-muted">Cargando…</p>
+        <p class="text-stone-600">Cargando…</p>
     }
     else if (items.Count == 0)
     {
-        <p class="text-sm text-gym-muted">No se encontraron usuarios.</p>
+        <p class="text-sm text-stone-600">No se encontraron usuarios.</p>
     }
     else
     {
-        <table class="table-gym">
+        <table class="ui-table">
             <thead><tr><th>Nombre</th><th>Correo</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Registro</th><th></th></tr></thead>
             <tbody>
                 @foreach (var u in items)
@@ -37,8 +37,8 @@
                         <td>@u.FechaRegistro.ToLocalTime().ToString("dd/MM/yyyy")</td>
                         <td>
                             <div class="flex justify-end gap-1">
-                                <a href="/admin/usuarios/@u.Id" class="btn-ghost btn-sm">Ver perfil</a>
-                                <button type="button" class="@(u.Activo ? "btn-danger" : "btn-ghost") btn-sm" @onclick="() => Toggle(u)">@(u.Activo ? "Desactivar" : "Activar")</button>
+                                <a href="/admin/usuarios/@u.Id" class="ui-btn ui-btn-soft ui-btn-sm">Ver perfil</a>
+                                <button type="button" class="@(u.Activo ? "ui-btn ui-btn-danger" : "ui-btn ui-btn-soft") ui-btn-sm" @onclick="() => Toggle(u)">@(u.Activo ? "Desactivar" : "Activar")</button>
                             </div>
                         </td>
                     </tr>

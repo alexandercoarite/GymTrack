@@ -1,14 +1,15 @@
 using System.Security.Claims;
 using GymTrack.Application.Interfaces;
 using GymTrack.Infrastructure.Identity;
+using GymTrack.Web.Config;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymTrack.Web;
 
-public static class Endpoints
+public sealed class Endpoints : IEndpoints
 {
-    public static void MapGymTrackEndpoints(this WebApplication app)
+    public void MapEndpoints(IEndpointRouteBuilder app)
     {
         // Cierre de sesión: POST con token antiforgery (la cookie no se puede borrar desde un circuito Blazor).
         app.MapPost("/cuenta/cerrar-sesion", async (SignInManager<ApplicationUser> signInManager, [FromForm] string? returnUrl) =>

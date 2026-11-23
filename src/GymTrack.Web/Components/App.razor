@@ -1,13 +1,12 @@
-@inject IWebHostEnvironment Host
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0d10" />
+    <meta name="theme-color" content="#fafaf9" />
     <base href="/" />
-    <link rel="stylesheet" href="@(Host.WebRootFileProvider.GetFileInfo("css/tailwind.css").Exists ? "css/tailwind.css" : "css/base.css")" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0d10'/%3E%3Ctext x='16' y='23' font-size='20' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%2339ff14'%3EG%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="css/tailwind.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23292524'/%3E%3Ctext x='16' y='23' font-size='20' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%23fef3c7'%3EG%3C/text%3E%3C/svg%3E" />
     <HeadOutlet @rendermode="RenderModeForPage" />
 </head>
 <body>

@@ -6,35 +6,35 @@
 <PageTitle>Gestión de máquinas · GymTrack</PageTitle>
 
 <PageHeader Title="Gestión de máquinas" Subtitle="Registra, edita y controla el estado del equipo.">
-    <button type="button" class="btn-primary" @onclick="New">+ Nueva máquina</button>
+    <button type="button" class="ui-btn ui-btn-primary" @onclick="New">+ Nueva máquina</button>
 </PageHeader>
 <Alert Kind="error" Message="@Error" />
 <Alert Kind="success" Message="@Ok" />
 
-<div class="card mb-4 grid gap-3 md:grid-cols-3">
-    <input class="input-gym" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" @bind="filter.Texto" @bind:event="oninput" @bind:after="Load" />
-    <select class="input-gym" aria-label="Categoría" @bind="filter.CategoryId" @bind:after="Load">
+<div class="ui-panel mb-4 grid gap-3 md:grid-cols-3">
+    <input class="ui-input" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" @bind="filter.Texto" @bind:event="oninput" @bind:after="Load" />
+    <select class="ui-input" aria-label="Categoría" @bind="filter.CategoryId" @bind:after="Load">
         <option value="">Todas las categorías</option>
         @foreach (var c in categories) { <option value="@c.Id">@c.Nombre</option> }
     </select>
-    <select class="input-gym" aria-label="Estado" @bind="filter.Estado" @bind:after="Load">
+    <select class="ui-input" aria-label="Estado" @bind="filter.Estado" @bind:after="Load">
         <option value="">Todos los estados</option>
         @foreach (var s in Enum.GetValues<MachineStatus>()) { <option value="@s">@s.Label()</option> }
     </select>
 </div>
 
-<div class="card overflow-x-auto">
+<div class="ui-panel overflow-x-auto">
     @if (machines == null)
     {
-        <p class="text-gym-muted">Cargando…</p>
+        <p class="text-stone-600">Cargando…</p>
     }
     else if (machines.Count == 0)
     {
-        <p class="text-sm text-gym-muted">No hay máquinas que coincidan.</p>
+        <p class="text-sm text-stone-600">No hay máquinas que coincidan.</p>
     }
     else
     {
-        <table class="table-gym">
+        <table class="ui-table">
             <thead>
                 <tr><th></th><th>Nombre</th><th>Categoría</th><th>Grupo</th><th>Tipo</th><th>Estado</th><th class="text-right">Acciones</th></tr>
             </thead>
@@ -43,7 +43,7 @@
                 {
                     <tr>
                         <td>
-                            <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-gym-dark">
+                            <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-stone-100">
                                 @if (!string.IsNullOrWhiteSpace(m.ImagenRuta)) { <img src="@m.ImagenRuta" alt="" class="h-full w-full object-cover" /> }
                                 else { <span aria-hidden="true">🏋️</span> }
                             </div>
@@ -55,17 +55,17 @@
                         <td><StatusBadge Status="m.Estado" /></td>
                         <td>
                             <div class="flex flex-wrap justify-end gap-1">
-                                <button type="button" class="btn-ghost btn-sm" @onclick="() => Edit(m)">Editar</button>
+                                <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="() => Edit(m)">Editar</button>
                                 @if (m.Estado != MachineStatus.Disponible)
                                 {
-                                    <button type="button" class="btn-ghost btn-sm" @onclick="() => SetStatus(m, MachineStatus.Disponible)">Marcar disponible</button>
+                                    <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="() => SetStatus(m, MachineStatus.Disponible)">Marcar disponible</button>
                                 }
                                 @if (m.Estado == MachineStatus.Disponible)
                                 {
-                                    <button type="button" class="btn-ghost btn-sm" @onclick="() => SetStatus(m, MachineStatus.FueraDeServicio)">Fuera de servicio</button>
-                                    <a href="/admin/mantenimiento?maquina=@m.Id" class="btn-ghost btn-sm">Mantenimiento</a>
+                                    <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="() => SetStatus(m, MachineStatus.FueraDeServicio)">Fuera de servicio</button>
+                                    <a href="/admin/mantenimiento?maquina=@m.Id" class="ui-btn ui-btn-soft ui-btn-sm">Mantenimiento</a>
                                 }
-                                <button type="button" class="btn-danger btn-sm" @onclick="() => toDelete = m">Eliminar</button>
+                                <button type="button" class="ui-btn ui-btn-danger ui-btn-sm" @onclick="() => toDelete = m">Eliminar</button>
                             </div>
                         </td>
                     </tr>
@@ -80,63 +80,63 @@
         <DataAnnotationsValidator />
         <Alert Kind="error" Message="@Error" />
         <div>
-            <label for="nombre" class="label-gym">Nombre</label>
-            <InputText id="nombre" @bind-Value="edit.Nombre" class="input-gym" />
+            <label for="nombre" class="ui-label">Nombre</label>
+            <InputText id="nombre" @bind-Value="edit.Nombre" class="ui-input" />
             <ValidationMessage For="() => edit.Nombre" />
         </div>
         <div>
-            <label for="desc" class="label-gym">Descripción</label>
-            <InputTextArea id="desc" @bind-Value="edit.Descripcion" rows="2" class="input-gym" />
+            <label for="desc" class="ui-label">Descripción</label>
+            <InputTextArea id="desc" @bind-Value="edit.Descripcion" rows="2" class="ui-input" />
             <ValidationMessage For="() => edit.Descripcion" />
         </div>
         <div>
-            <label for="instr" class="label-gym">Instrucciones básicas de uso</label>
-            <InputTextArea id="instr" @bind-Value="edit.Instrucciones" rows="3" class="input-gym" />
+            <label for="instr" class="ui-label">Instrucciones básicas de uso</label>
+            <InputTextArea id="instr" @bind-Value="edit.Instrucciones" rows="3" class="ui-input" />
             <ValidationMessage For="() => edit.Instrucciones" />
         </div>
         <div class="grid gap-4 md:grid-cols-3">
             <div>
-                <label for="cat" class="label-gym">Categoría</label>
-                <InputSelect id="cat" @bind-Value="edit.CategoryId" class="input-gym">
+                <label for="cat" class="ui-label">Categoría</label>
+                <InputSelect id="cat" @bind-Value="edit.CategoryId" class="ui-input">
                     @foreach (var c in categories) { <option value="@c.Id">@c.Nombre</option> }
                 </InputSelect>
                 <ValidationMessage For="() => edit.CategoryId" />
             </div>
             <div>
-                <label for="grp" class="label-gym">Grupo muscular</label>
-                <InputSelect id="grp" @bind-Value="edit.MuscleGroupId" class="input-gym">
+                <label for="grp" class="ui-label">Grupo muscular</label>
+                <InputSelect id="grp" @bind-Value="edit.MuscleGroupId" class="ui-input">
                     @foreach (var g in groups) { <option value="@g.Id">@g.Nombre</option> }
                 </InputSelect>
                 <ValidationMessage For="() => edit.MuscleGroupId" />
             </div>
             <div>
-                <label for="tipo" class="label-gym">Tipo de entrenamiento</label>
-                <InputSelect id="tipo" @bind-Value="edit.Tipo" class="input-gym">
+                <label for="tipo" class="ui-label">Tipo de entrenamiento</label>
+                <InputSelect id="tipo" @bind-Value="edit.Tipo" class="ui-input">
                     <option value="@TrainingType.Fuerza">Fuerza</option>
                     <option value="@TrainingType.Cardiovascular">Cardiovascular</option>
                 </InputSelect>
             </div>
         </div>
         <div>
-            <label class="label-gym">Fotografía de la máquina</label>
+            <label class="ui-label">Fotografía de la máquina</label>
             <div class="flex items-center gap-4">
-                <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl bg-gym-dark">
+                <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl bg-stone-100">
                     @if (!string.IsNullOrWhiteSpace(edit.ImagenRuta)) { <img src="@edit.ImagenRuta" alt="Vista previa" class="h-full w-full object-cover" /> }
                     else { <span class="text-3xl" aria-hidden="true">🏋️</span> }
                 </div>
                 <div class="space-y-2">
                     <InputFile OnChange="OnImage" accept="image/jpeg,image/png,image/webp" class="text-sm" />
-                    <p class="hint-gym">JPG, PNG o WEBP · máximo 2 MB.</p>
+                    <p class="ui-hint">JPG, PNG o WEBP · máximo 2 MB.</p>
                     @if (!string.IsNullOrWhiteSpace(edit.ImagenRuta))
                     {
-                        <button type="button" class="btn-ghost btn-sm" @onclick="RemoveImage">Quitar imagen</button>
+                        <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="RemoveImage">Quitar imagen</button>
                     }
                 </div>
             </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-            <button type="button" class="btn-ghost" @onclick="CancelForm">Cancelar</button>
-            <button type="submit" class="btn-primary" disabled="@Busy">Guardar</button>
+            <button type="button" class="ui-btn ui-btn-soft" @onclick="CancelForm">Cancelar</button>
+            <button type="submit" class="ui-btn ui-btn-primary" disabled="@Busy">Guardar</button>
         </div>
     </EditForm>
 </Modal>

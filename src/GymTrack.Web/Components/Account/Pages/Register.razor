@@ -6,69 +6,66 @@
 
 <PageTitle>Crear cuenta · GymTrack</PageTitle>
 
-<div class="mx-auto max-w-xl px-4 py-12">
-    <div class="card">
-        <h1 class="text-2xl font-extrabold">Crear cuenta</h1>
-        <p class="mb-5 mt-1 text-sm text-gym-muted">Regístrate para recibir rutinas personalizadas y seguir tu progreso.</p>
+<AuthCard Title="Crear cuenta" Subtitle="Regístrate para recibir rutinas personalizadas y seguir tu progreso.">
+<ChildContent>
+    <Alert Kind="error" Message="@error" />
 
-        <Alert Kind="error" Message="@error" />
-
-        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register" class="space-y-4">
-            <DataAnnotationsValidator />
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label for="nombre" class="label-gym">Nombre</label>
-                    <InputText id="nombre" @bind-Value="Input.Nombre" class="input-gym" autocomplete="given-name" />
-                    <ValidationMessage For="() => Input.Nombre" />
-                </div>
-                <div>
-                    <label for="apellido" class="label-gym">Apellido</label>
-                    <InputText id="apellido" @bind-Value="Input.Apellido" class="input-gym" autocomplete="family-name" />
-                    <ValidationMessage For="() => Input.Apellido" />
-                </div>
+    <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register" class="space-y-4">
+        <DataAnnotationsValidator />
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label for="nombre" class="ui-label">Nombre</label>
+                <InputText id="nombre" @bind-Value="Input.Nombre" class="ui-input" autocomplete="given-name" />
+                <ValidationMessage For="() => Input.Nombre" />
             </div>
             <div>
-                <label for="email" class="label-gym">Correo electrónico</label>
-                <InputText id="email" type="email" @bind-Value="Input.Email" class="input-gym" autocomplete="email" />
-                <ValidationMessage For="() => Input.Email" />
+                <label for="apellido" class="ui-label">Apellido</label>
+                <InputText id="apellido" @bind-Value="Input.Apellido" class="ui-input" autocomplete="family-name" />
+                <ValidationMessage For="() => Input.Apellido" />
+            </div>
+        </div>
+        <div>
+            <label for="email" class="ui-label">Correo electrónico</label>
+            <InputText id="email" type="email" @bind-Value="Input.Email" class="ui-input" autocomplete="email" />
+            <ValidationMessage For="() => Input.Email" />
+        </div>
+        <div>
+            <label for="usuario" class="ui-label">Nombre de usuario</label>
+            <InputText id="usuario" @bind-Value="Input.UserName" class="ui-input" autocomplete="username" />
+            <ValidationMessage For="() => Input.UserName" />
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label for="nacimiento" class="ui-label">Fecha de nacimiento (opcional)</label>
+                <InputDate id="nacimiento" @bind-Value="Input.FechaNacimiento" class="ui-input" />
+                <p class="ui-hint">Nos ayuda a adaptar las recomendaciones.</p>
+                <ValidationMessage For="() => Input.FechaNacimiento" />
             </div>
             <div>
-                <label for="usuario" class="label-gym">Nombre de usuario</label>
-                <InputText id="usuario" @bind-Value="Input.UserName" class="input-gym" autocomplete="username" />
-                <ValidationMessage For="() => Input.UserName" />
+                <label for="telefono" class="ui-label">Teléfono (opcional)</label>
+                <InputText id="telefono" type="tel" @bind-Value="Input.Telefono" class="ui-input" autocomplete="tel" />
+                <ValidationMessage For="() => Input.Telefono" />
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label for="nacimiento" class="label-gym">Fecha de nacimiento (opcional)</label>
-                    <InputDate id="nacimiento" @bind-Value="Input.FechaNacimiento" class="input-gym" />
-                    <p class="hint-gym">Nos ayuda a adaptar las recomendaciones.</p>
-                    <ValidationMessage For="() => Input.FechaNacimiento" />
-                </div>
-                <div>
-                    <label for="telefono" class="label-gym">Teléfono (opcional)</label>
-                    <InputText id="telefono" type="tel" @bind-Value="Input.Telefono" class="input-gym" autocomplete="tel" />
-                    <ValidationMessage For="() => Input.Telefono" />
-                </div>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label for="password" class="ui-label">Contraseña</label>
+                <InputText id="password" type="password" @bind-Value="Input.Password" class="ui-input" autocomplete="new-password" />
+                <ValidationMessage For="() => Input.Password" />
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label for="password" class="label-gym">Contraseña</label>
-                    <InputText id="password" type="password" @bind-Value="Input.Password" class="input-gym" autocomplete="new-password" />
-                    <ValidationMessage For="() => Input.Password" />
-                </div>
-                <div>
-                    <label for="confirmar" class="label-gym">Confirmar contraseña</label>
-                    <InputText id="confirmar" type="password" @bind-Value="Input.ConfirmarPassword" class="input-gym" autocomplete="new-password" />
-                    <ValidationMessage For="() => Input.ConfirmarPassword" />
-                </div>
+            <div>
+                <label for="confirmar" class="ui-label">Confirmar contraseña</label>
+                <InputText id="confirmar" type="password" @bind-Value="Input.ConfirmarPassword" class="ui-input" autocomplete="new-password" />
+                <ValidationMessage For="() => Input.ConfirmarPassword" />
             </div>
-            <p class="hint-gym">Mínimo 8 caracteres, con mayúscula, minúscula y número.</p>
-            <button type="submit" class="btn-primary w-full">Crear cuenta</button>
-        </EditForm>
+        </div>
+        <p class="ui-hint">Mínimo 8 caracteres, con mayúscula, minúscula y número.</p>
+        <button type="submit" class="ui-btn ui-btn-primary w-full">Crear cuenta</button>
+    </EditForm>
 
-        <p class="mt-5 text-sm text-gym-muted">¿Ya tienes cuenta? <a href="/cuenta/iniciar-sesion" class="text-gym-accent hover:underline">Inicia sesión</a></p>
-    </div>
-</div>
+    <p class="mt-5 text-sm text-stone-600">¿Ya tienes cuenta? <a href="/cuenta/iniciar-sesion" class="text-amber-700 hover:underline">Inicia sesión</a></p>
+</ChildContent>
+</AuthCard>
 
 @code {
     private string? error;

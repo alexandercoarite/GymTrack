@@ -1,20 +1,20 @@
 @if (Points.Count == 0)
 {
-    <p class="text-sm text-gym-muted">Aún no hay datos para mostrar.</p>
+    <p class="text-sm text-stone-600">Aún no hay datos para mostrar.</p>
 }
 else
 {
     <svg viewBox="0 0 600 220" class="h-auto w-full" role="img" aria-label="@AriaLabel">
-        <line x1="@PadL" y1="@PadT" x2="@PadL" y2="@(Height - PadB)" stroke="#2a313a" />
-        <line x1="@PadL" y1="@(Height - PadB)" x2="@(Width - PadR)" y2="@(Height - PadB)" stroke="#2a313a" />
+        <line x1="@PadL" y1="@PadT" x2="@PadL" y2="@(Height - PadB)" stroke="#d6d3d1" />
+        <line x1="@PadL" y1="@(Height - PadB)" x2="@(Width - PadR)" y2="@(Height - PadB)" stroke="#d6d3d1" />
         <text x="@(PadL - 6)" y="@(PadT + 4)" text-anchor="end" font-size="11" fill="#8b95a1">@Fmt(max)</text>
         <text x="@(PadL - 6)" y="@(Height - PadB)" text-anchor="end" font-size="11" fill="#8b95a1">@Fmt(min)</text>
-        <polyline fill="none" stroke="#39ff14" stroke-width="2.5" stroke-linejoin="round" points="@Polyline" />
+        <polyline fill="none" stroke="#b45309" stroke-width="2.5" stroke-linejoin="round" points="@Polyline" />
         @for (var i = 0; i < Points.Count; i++)
         {
             var x = X(i);
             var y = Y(Points[i].Value);
-            <circle cx="@Fmt(x)" cy="@Fmt(y)" r="4" fill="#39ff14"><title>@Points[i].Label: @Fmt(Points[i].Value) @Unit</title></circle>
+            <circle cx="@Fmt(x)" cy="@Fmt(y)" r="4" fill="#b45309"><title>@Points[i].Label: @Fmt(Points[i].Value) @Unit</title></circle>
         }
         <text x="@PadL" y="@(Height - 8)" font-size="11" fill="#8b95a1">@Points[0].Label</text>
         <text x="@(Width - PadR)" y="@(Height - 8)" text-anchor="end" font-size="11" fill="#8b95a1">@Points[^1].Label</text>

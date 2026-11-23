@@ -7,29 +7,29 @@
 <PageHeader Title="Catálogo de máquinas" Subtitle="Consulta el equipo del gimnasio y si está disponible." />
 <Alert Kind="error" Message="@Error" />
 
-<div class="card mb-6 grid gap-3 md:grid-cols-4">
+<div class="ui-panel mb-6 grid gap-3 md:grid-cols-4">
     <div>
-        <label for="buscar" class="label-gym">Nombre</label>
-        <input id="buscar" class="input-gym" placeholder="Buscar máquina…" @bind="filter.Texto" @bind:event="oninput" @bind:after="Load" />
+        <label for="buscar" class="ui-label">Nombre</label>
+        <input id="buscar" class="ui-input" placeholder="Buscar máquina…" @bind="filter.Texto" @bind:event="oninput" @bind:after="Load" />
     </div>
     <div>
-        <label for="grupo" class="label-gym">Grupo muscular</label>
-        <select id="grupo" class="input-gym" @bind="filter.MuscleGroupId" @bind:after="Load">
+        <label for="grupo" class="ui-label">Grupo muscular</label>
+        <select id="grupo" class="ui-input" @bind="filter.MuscleGroupId" @bind:after="Load">
             <option value="">Todos</option>
             @foreach (var g in groups) { <option value="@g.Id">@g.Nombre</option> }
         </select>
     </div>
     <div>
-        <label for="tipo" class="label-gym">Tipo de entrenamiento</label>
-        <select id="tipo" class="input-gym" @bind="filter.Tipo" @bind:after="Load">
+        <label for="tipo" class="ui-label">Tipo de entrenamiento</label>
+        <select id="tipo" class="ui-input" @bind="filter.Tipo" @bind:after="Load">
             <option value="">Todos</option>
             <option value="@TrainingType.Fuerza">Fuerza</option>
             <option value="@TrainingType.Cardiovascular">Cardiovascular</option>
         </select>
     </div>
     <div>
-        <label for="estado" class="label-gym">Disponibilidad</label>
-        <select id="estado" class="input-gym" @bind="filter.Estado" @bind:after="Load">
+        <label for="estado" class="ui-label">Disponibilidad</label>
+        <select id="estado" class="ui-input" @bind="filter.Estado" @bind:after="Load">
             <option value="">Todas</option>
             @foreach (var s in Enum.GetValues<MachineStatus>()) { <option value="@s">@s.Label()</option> }
         </select>
@@ -38,15 +38,15 @@
 
 @if (machines == null)
 {
-    <p class="text-gym-muted">Cargando…</p>
+    <p class="text-stone-600">Cargando…</p>
 }
 else if (machines.Count == 0)
 {
-    <p class="text-gym-muted">No se encontraron máquinas con esos filtros.</p>
+    <p class="text-stone-600">No se encontraron máquinas con esos filtros.</p>
 }
 else
 {
-    <p class="mb-3 text-sm text-gym-muted">@machines.Count máquina(s)</p>
+    <p class="mb-3 text-sm text-stone-600">@machines.Count máquina(s)</p>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach (var m in machines)
         {

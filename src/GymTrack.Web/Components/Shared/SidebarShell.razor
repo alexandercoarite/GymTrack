@@ -7,14 +7,14 @@
         <div class="fixed inset-0 z-30 bg-black/60 md:hidden" @onclick="Close"></div>
     }
 
-    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-gym-border bg-gym-dark p-4 transition-transform md:sticky md:top-0 md:h-screen md:translate-x-0 @(open ? "translate-x-0" : "-translate-x-full")">
-        <a href="/" class="px-3 text-xl font-extrabold tracking-tight">Gym<span class="text-gym-accent">Track</span></a>
-        <p class="mt-1 px-3 text-xs uppercase tracking-widest text-gym-muted">@Area</p>
+    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-stone-200 bg-white p-4 transition-transform md:sticky md:top-0 md:h-screen md:translate-x-0 @(open ? "translate-x-0" : "-translate-x-full")">
+        <a href="/" class="px-3 text-xl font-extrabold tracking-tight">Gym<span class="text-amber-700">Track</span></a>
+        <p class="mt-1 px-3 text-xs uppercase tracking-widest text-stone-600">@Area</p>
 
         <nav class="mt-6 flex-1 space-y-1 overflow-y-auto" aria-label="Menú @Area">
             @foreach (var item in Items)
             {
-                <NavLink href="@item.Href" class="nav-link" ActiveClass="nav-link-active"
+                <NavLink href="@item.Href" class="ui-nav-link" ActiveClass="active"
                          Match="@(item.Exact ? NavLinkMatch.All : NavLinkMatch.Prefix)">
                     <span aria-hidden="true">@item.Icon</span>
                     <span>@item.Label</span>
@@ -22,18 +22,18 @@
             }
         </nav>
 
-        <div class="border-t border-gym-border pt-4">
+        <div class="border-t border-stone-200 pt-4">
             <AuthorizeView>
-                <p class="mb-2 truncate px-3 text-xs text-gym-muted">@context.User.Identity?.Name</p>
+                <p class="mb-2 truncate px-3 text-xs text-stone-600">@context.User.Identity?.Name</p>
             </AuthorizeView>
             <div class="px-3"><LogoutButton /></div>
         </div>
     </aside>
 
     <div class="min-w-0 flex-1">
-        <div class="sticky top-0 z-20 flex items-center justify-between border-b border-gym-border bg-gym-black/90 px-4 py-3 backdrop-blur md:hidden">
-            <a href="/" class="font-extrabold">Gym<span class="text-gym-accent">Track</span></a>
-            <button type="button" class="btn-ghost btn-sm" @onclick="Toggle" aria-label="Abrir menú">☰ Menú</button>
+        <div class="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200 bg-stone-50/90 px-4 py-3 backdrop-blur md:hidden">
+            <a href="/" class="font-extrabold">Gym<span class="text-amber-700">Track</span></a>
+            <button type="button" class="ui-btn ui-btn-soft ui-btn-sm" @onclick="Toggle" aria-label="Abrir menú">☰ Menú</button>
         </div>
         <main class="mx-auto max-w-6xl p-4 md:p-8">
             <ErrorBoundary>

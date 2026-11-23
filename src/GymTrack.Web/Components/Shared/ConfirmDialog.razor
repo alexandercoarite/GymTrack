@@ -1,8 +1,8 @@
 <Modal Visible="Visible" Title="@Title" OnClose="OnCancel">
-    <p class="text-sm text-gray-300">@Message</p>
+    <p class="text-sm text-stone-700">@Message</p>
     <div class="mt-6 flex justify-end gap-2">
-        <button type="button" class="btn-ghost" @onclick="OnCancel">Cancelar</button>
-        <button type="button" class="btn-danger" @onclick="OnConfirm">@ConfirmText</button>
+        <button type="button" class="ui-btn ui-btn-soft" @onclick="OnCancel">Cancelar</button>
+        <button type="button" class="ui-btn ui-btn-danger" @onclick="OnConfirm">@ConfirmText</button>
     </div>
 </Modal>
 

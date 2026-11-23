@@ -1,9 +1,9 @@
-<div class="card fade-in">
-    <p class="text-xs font-semibold uppercase tracking-wide text-gym-muted">@Label</p>
-    <p class="mt-2 text-3xl font-extrabold @(Accent ? "text-gym-accent" : "text-white")">@Value</p>
+<div class="ui-panel fade-in">
+    <p class="text-xs font-semibold uppercase tracking-wide text-stone-600">@Label</p>
+    <p class="mt-2 text-3xl font-extrabold @(Accent ? "text-amber-700" : "text-stone-900")">@Value</p>
     @if (!string.IsNullOrWhiteSpace(Hint))
     {
-        <p class="mt-1 text-xs text-gym-muted">@Hint</p>
+        <p class="mt-1 text-xs text-stone-600">@Hint</p>
     }
 </div>
 

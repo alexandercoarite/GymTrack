@@ -6,7 +6,7 @@
 
 @if (data == null)
 {
-    <p class="text-gym-muted">Cargando tu panel…</p>
+    <p class="text-stone-600">Cargando tu panel…</p>
 }
 else
 {
@@ -15,10 +15,10 @@ else
 
     @if (!data.TieneCuestionario)
     {
-        <div class="card mb-6 border-gym-accent/50">
+        <div class="ui-panel mb-6 border-amber-700/50">
             <h2 class="font-bold">Completa tu cuestionario</h2>
-            <p class="mt-1 text-sm text-gray-300">Cuéntanos tus objetivos y disponibilidad para generar tu primera rutina personalizada.</p>
-            <a href="/app/cuestionario" class="btn-primary mt-4">Empezar cuestionario</a>
+            <p class="mt-1 text-sm text-stone-700">Cuéntanos tus objetivos y disponibilidad para generar tu primera rutina personalizada.</p>
+            <a href="/app/cuestionario" class="ui-btn ui-btn-primary mt-4">Empezar cuestionario</a>
         </div>
     }
 
@@ -30,32 +30,32 @@ else
     </div>
 
     <div class="mt-6 grid gap-4 lg:grid-cols-2">
-        <section class="card">
+        <section class="ui-panel">
             <div class="flex items-center justify-between">
                 <h2 class="font-bold">Rutina recomendada</h2>
-                <a href="/app/rutinas" class="text-sm text-gym-accent hover:underline">Ver completa</a>
+                <a href="/app/rutinas" class="text-sm text-amber-700 hover:underline">Ver completa</a>
             </div>
             @if (data.RutinaActiva == null)
             {
-                <p class="mt-3 text-sm text-gym-muted">Todavía no tienes una rutina. Completa el cuestionario para generarla.</p>
+                <p class="mt-3 text-sm text-stone-600">Todavía no tienes una rutina. Completa el cuestionario para generarla.</p>
             }
             else
             {
                 <p class="mt-3 font-semibold">@data.RutinaActiva.Nombre</p>
-                <p class="text-xs text-gym-muted">@data.RutinaActiva.Dias día(s) por semana · aprox. @data.RutinaActiva.TiempoEstimadoMin min por sesión</p>
-                <ul class="mt-3 space-y-1 text-sm text-gray-300">
+                <p class="text-xs text-stone-600">@data.RutinaActiva.Dias día(s) por semana · aprox. @data.RutinaActiva.TiempoEstimadoMin min por sesión</p>
+                <ul class="mt-3 space-y-1 text-sm text-stone-700">
                     @foreach (var day in data.RutinaActiva.Ejercicios.GroupBy(e => e.Dia).OrderBy(g => g.Key))
                     {
-                        <li><span class="font-semibold text-white">Día @day.Key:</span> @string.Join(", ", day.Take(4).Select(e => e.Ejercicio))@(day.Count() > 4 ? "…" : "")</li>
+                        <li><span class="font-semibold text-stone-900">Día @day.Key:</span> @string.Join(", ", day.Take(4).Select(e => e.Ejercicio))@(day.Count() > 4 ? "…" : "")</li>
                     }
                 </ul>
             }
         </section>
 
-        <section class="card">
+        <section class="ui-panel">
             <div class="flex items-center justify-between">
                 <h2 class="font-bold">Evolución de peso</h2>
-                <a href="/app/progreso" class="text-sm text-gym-accent hover:underline">Registrar</a>
+                <a href="/app/progreso" class="text-sm text-amber-700 hover:underline">Registrar</a>
             </div>
             <div class="mt-3">
                 <LineChart Points="WeightPoints" Unit="kg" AriaLabel="Evolución del peso corporal" />
@@ -64,33 +64,33 @@ else
     </div>
 
     <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <a href="/app/maquinas" class="card text-center transition hover:border-gym-accent"><p class="text-3xl" aria-hidden="true">🏋️</p><p class="mt-2 font-semibold">Máquinas</p></a>
-        <a href="/app/evaluacion" class="card text-center transition hover:border-gym-accent"><p class="text-3xl" aria-hidden="true">📸</p><p class="mt-2 font-semibold">Evaluación corporal</p></a>
-        <a href="/app/rutinas" class="card text-center transition hover:border-gym-accent"><p class="text-3xl" aria-hidden="true">📋</p><p class="mt-2 font-semibold">Mis rutinas</p></a>
-        <a href="/app/progreso" class="card text-center transition hover:border-gym-accent"><p class="text-3xl" aria-hidden="true">📈</p><p class="mt-2 font-semibold">Mi progreso</p></a>
+        <a href="/app/maquinas" class="ui-panel text-center transition hover:border-amber-700"><p class="text-3xl" aria-hidden="true">🏋️</p><p class="mt-2 font-semibold">Máquinas</p></a>
+        <a href="/app/evaluacion" class="ui-panel text-center transition hover:border-amber-700"><p class="text-3xl" aria-hidden="true">📸</p><p class="mt-2 font-semibold">Evaluación corporal</p></a>
+        <a href="/app/rutinas" class="ui-panel text-center transition hover:border-amber-700"><p class="text-3xl" aria-hidden="true">📋</p><p class="mt-2 font-semibold">Mis rutinas</p></a>
+        <a href="/app/progreso" class="ui-panel text-center transition hover:border-amber-700"><p class="text-3xl" aria-hidden="true">📈</p><p class="mt-2 font-semibold">Mi progreso</p></a>
     </div>
 
-    <section class="card mt-6">
+    <section class="ui-panel mt-6">
         <h2 class="font-bold">Horarios del gimnasio</h2>
         @if (status != null)
         {
-            <p class="mt-1 text-sm @(status.AbiertoAhora ? "text-gym-accent" : "text-gym-muted")">@status.Mensaje</p>
+            <p class="mt-1 text-sm @(status.AbiertoAhora ? "text-amber-700" : "text-stone-600")">@status.Mensaje</p>
         }
         @if (week != null)
         {
             <div class="mt-3 grid gap-x-8 gap-y-1 text-sm sm:grid-cols-2">
                 @foreach (var d in week)
                 {
-                    <div class="flex justify-between border-b border-gym-border/50 py-1">
+                    <div class="flex justify-between border-b border-stone-200/50 py-1">
                         <span>@DayLabels.Of(d.Dia)</span>
-                        <span class="text-gray-300">
+                        <span class="text-stone-700">
                             @if (d.Abierto && d.Apertura != null && d.Cierre != null)
                             {
                                 @($"{d.Apertura:HH\\:mm} – {d.Cierre:HH\\:mm}")
                             }
                             else
                             {
-                                <span class="text-gym-muted">Cerrado</span>
+                                <span class="text-stone-600">Cerrado</span>
                             }
                         </span>
                     </div>

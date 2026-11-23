@@ -8,13 +8,13 @@
 <Alert Kind="error" Message="@Error" />
 <Alert Kind="success" Message="@Ok" />
 
-<section class="card mb-6">
+<section class="ui-panel mb-6">
     <h2 class="font-bold">Registrar máquina en mantenimiento</h2>
     <EditForm Model="form" OnValidSubmit="Register" class="mt-4 grid gap-4 md:grid-cols-3">
         <DataAnnotationsValidator />
         <div>
-            <label for="maquina" class="label-gym">Máquina</label>
-            <InputSelect id="maquina" @bind-Value="form.MachineId" class="input-gym">
+            <label for="maquina" class="ui-label">Máquina</label>
+            <InputSelect id="maquina" @bind-Value="form.MachineId" class="ui-input">
                 <option value="0">Selecciona…</option>
                 @foreach (var m in machines.Where(m => m.Estado != MachineStatus.EnMantenimiento))
                 {
@@ -24,17 +24,17 @@
             <ValidationMessage For="() => form.MachineId" />
         </div>
         <div class="md:col-span-2">
-            <label for="problema" class="label-gym">Descripción del problema</label>
-            <InputText id="problema" @bind-Value="form.Descripcion" class="input-gym" />
+            <label for="problema" class="ui-label">Descripción del problema</label>
+            <InputText id="problema" @bind-Value="form.Descripcion" class="ui-input" />
             <ValidationMessage For="() => form.Descripcion" />
         </div>
         <div class="md:col-span-3">
-            <button type="submit" class="btn-primary" disabled="@Busy">Registrar mantenimiento</button>
+            <button type="submit" class="ui-btn ui-btn-primary" disabled="@Busy">Registrar mantenimiento</button>
         </div>
     </EditForm>
 </section>
 
-<section class="card">
+<section class="ui-panel">
     <div class="flex flex-wrap items-center justify-between gap-2">
         <h2 class="font-bold">Registros</h2>
         <label class="flex items-center gap-2 text-sm">
@@ -43,12 +43,12 @@
     </div>
     @if (records.Count == 0)
     {
-        <p class="mt-3 text-sm text-gym-muted">No hay registros de mantenimiento.</p>
+        <p class="mt-3 text-sm text-stone-600">No hay registros de mantenimiento.</p>
     }
     else
     {
         <div class="mt-3 overflow-x-auto">
-            <table class="table-gym">
+            <table class="ui-table">
                 <thead><tr><th>Máquina</th><th>Problema</th><th>Inicio</th><th>Fin</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
                     @foreach (var r in records)
@@ -57,7 +57,7 @@
                             <td class="font-semibold">@r.Maquina</td>
                             <td class="max-w-xs">
                                 @r.Descripcion
-                                @if (!string.IsNullOrWhiteSpace(r.Observaciones)) { <p class="text-xs text-gym-muted">Obs.: @r.Observaciones</p> }
+                                @if (!string.IsNullOrWhiteSpace(r.Observaciones)) { <p class="text-xs text-stone-600">Obs.: @r.Observaciones</p> }
                             </td>
                             <td>@r.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy")</td>
                             <td>@(r.FechaFin?.ToLocalTime().ToString("dd/MM/yyyy") ?? "—")</td>
@@ -65,7 +65,7 @@
                             <td class="text-right">
                                 @if (r.Estado == MaintenanceStatus.Abierto)
                                 {
-                                    <button type="button" class="btn-primary btn-sm" @onclick="() => OpenResolve(r)">Marcar como resuelto</button>
+                                    <button type="button" class="ui-btn ui-btn-primary ui-btn-sm" @onclick="() => OpenResolve(r)">Marcar como resuelto</button>
                                 }
                             </td>
                         </tr>
@@ -77,14 +77,14 @@
 </section>
 
 <Modal Visible="resolving != null" Title="Cerrar mantenimiento" OnClose="() => resolving = null">
-    <p class="text-sm text-gray-300">La máquina «@resolving?.Maquina» volverá a estar disponible.</p>
+    <p class="text-sm text-stone-700">La máquina «@resolving?.Maquina» volverá a estar disponible.</p>
     <div class="mt-4">
-        <label for="obs" class="label-gym">Observaciones (opcional)</label>
-        <textarea id="obs" rows="3" maxlength="1000" class="input-gym" @bind="notes"></textarea>
+        <label for="obs" class="ui-label">Observaciones (opcional)</label>
+        <textarea id="obs" rows="3" maxlength="1000" class="ui-input" @bind="notes"></textarea>
     </div>
     <div class="mt-5 flex justify-end gap-2">
-        <button type="button" class="btn-ghost" @onclick="() => resolving = null">Cancelar</button>
-        <button type="button" class="btn-primary" @onclick="Resolve" disabled="@Busy">Confirmar</button>
+        <button type="button" class="ui-btn ui-btn-soft" @onclick="() => resolving = null">Cancelar</button>
+        <button type="button" class="ui-btn ui-btn-primary" @onclick="Resolve" disabled="@Busy">Confirmar</button>
     </div>
 </Modal>
 
