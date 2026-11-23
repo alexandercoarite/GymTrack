@@ -14,12 +14,14 @@ namespace GymTrack.Infrastructure.Services;
 public class UserAdminService : IUserAdminService
 {
     private readonly IDbContextFactory<AppDbContext> _factory;
+    private readonly AppDbContext _identityDb;
     private readonly UserManager<ApplicationUser> _users;
     private readonly ICurrentUser _current;
     private readonly IAuditService _audit;
 
-    public UserAdminService(IDbContextFactory<AppDbContext> factory, UserManager<ApplicationUser> users, ICurrentUser current, IAuditService audit)
+    public UserAdminService(IDbContextFactory<AppDbContext> factory, UserManager<ApplicationUser> users, ICurrentUser current, IAuditService audit, AppDbContext identityDb)
     {
+        _identityDb = identityDb;
         _factory = factory;
         _users = users;
         _current = current;
@@ -67,13 +69,14 @@ public class UserAdminService : IUserAdminService
         var me = await _current.RequireUserIdAsync();
         if (me == id && !activo) throw new ServiceException("No puedes desactivar tu propia cuenta.");
 
+        await using var transaction = await _identityDb.Database.BeginTransactionAsync();
         var user = await _users.FindByIdAsync(id) ?? throw new ServiceException("El usuario no existe.");
         user.Activo = activo;
-        await _users.UpdateAsync(user);
-        await _users.SetLockoutEnabledAsync(user, true);
-        await _users.SetLockoutEndDateAsync(user, activo ? null : DateTimeOffset.MaxValue);
-        // Invalida las sesiones abiertas del usuario desactivado.
-        await _users.UpdateSecurityStampAsync(user);
+        user.LockoutEnabled = true;
+        user.LockoutEnd = activo ? null : DateTimeOffset.MaxValue;
+        user.AccessFailedCount = 0;
+        CheckIdentity(await _users.UpdateSecurityStampAsync(user));
+        await transaction.CommitAsync();
         await _audit.LogAsync(activo ? "ActivarCuenta" : "DesactivarCuenta", nameof(ApplicationUser), id, user.Email);
     }
 
@@ -84,19 +87,23 @@ public class UserAdminService : IUserAdminService
         var me = await _current.RequireUserIdAsync();
         if (me == id) throw new ServiceException("No puedes cambiar tu propio rol.");
 
+        await using var transaction = await _identityDb.Database.BeginTransactionAsync();
         var user = await _users.FindByIdAsync(id) ?? throw new ServiceException("El usuario no existe.");
         var current = await _users.GetRolesAsync(user);
         if (current.Contains(rol) && current.Count == 1) return;
 
-        if (current.Count > 0)
-        {
-            var removed = await _users.RemoveFromRolesAsync(user, current);
-            if (!removed.Succeeded) throw new ServiceException("No se pudo actualizar el rol.");
-        }
-        var added = await _users.AddToRoleAsync(user, rol);
-        if (!added.Succeeded) throw new ServiceException("No se pudo actualizar el rol.");
-        await _users.UpdateSecurityStampAsync(user);
+        var previous = current.Where(existing => existing != rol).ToArray();
+        if (previous.Length > 0) CheckIdentity(await _users.RemoveFromRolesAsync(user, previous));
+        if (!current.Contains(rol)) CheckIdentity(await _users.AddToRoleAsync(user, rol));
+        CheckIdentity(await _users.UpdateSecurityStampAsync(user));
+
+        await transaction.CommitAsync();
         await _audit.LogAsync("CambiarRol", nameof(ApplicationUser), id, rol);
+    }
+
+    private static void CheckIdentity(IdentityResult result)
+    {
+        if (!result.Succeeded) throw new ServiceException(string.Join(" ", result.Errors.Select(error => error.Description)));
     }
 
     // El administrador ve el historial y los resultados, pero no las fotografías (solo las ve su propietario).

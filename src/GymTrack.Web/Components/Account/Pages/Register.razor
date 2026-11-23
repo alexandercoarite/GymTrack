@@ -3,6 +3,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager Nav
 @inject ILogger<Register> Logger
+@inject GymTrack.Infrastructure.Data.AppDbContext IdentityDb
 
 <PageTitle>Crear cuenta · GymTrack</PageTitle>
 
@@ -88,6 +89,7 @@
             Activo = true
         };
 
+        await using var transaction = await IdentityDb.Database.BeginTransactionAsync();
         var result = await UserManager.CreateAsync(user, Input.Password);
         if (!result.Succeeded)
         {
@@ -95,7 +97,14 @@
             return;
         }
 
-        await UserManager.AddToRoleAsync(user, AppRoles.Client);
+        var role = await UserManager.AddToRoleAsync(user, AppRoles.Client);
+        if (!role.Succeeded)
+        {
+            error = "No se pudo completar el registro. Inténtalo nuevamente.";
+            return;
+        }
+
+        await transaction.CommitAsync();
         Logger.LogInformation("Nuevo cliente registrado: {UserId}", user.Id);
         await SignInManager.SignInAsync(user, isPersistent: false);
         Nav.NavigateTo("/app/cuestionario", forceLoad: true);

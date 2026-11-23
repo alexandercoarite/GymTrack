@@ -338,6 +338,7 @@ public class MaintenanceService : IMaintenanceService
             throw new ServiceException("Las observaciones no pueden superar 1000 caracteres.");
 
         await using var db = await _factory.CreateDbContextAsync();
+        await using var transaction = await db.Database.BeginTransactionAsync();
         var record = await db.MaintenanceRecords.Include(r => r.Machine).FirstOrDefaultAsync(r => r.Id == recordId)
                      ?? throw new ServiceException("El registro de mantenimiento no existe.");
         if (record.Estado == MaintenanceStatus.Resuelto)
@@ -356,6 +357,7 @@ public class MaintenanceService : IMaintenanceService
             await db.SaveChangesAsync();
         }
 
+        await transaction.CommitAsync();
         await _audit.LogAsync("CerrarMantenimiento", nameof(MaintenanceRecord), recordId.ToString(), record.Machine?.Nombre);
     }
 }

@@ -19,12 +19,13 @@ public sealed class Endpoints : IEndpoints
         });
 
         // Fotografías corporales: solo las puede abrir su propietario autenticado.
-        app.MapGet("/api/fotos/{id:int}", async (int id, ClaimsPrincipal user, IBodyAssessmentService service) =>
+        app.MapGet("/api/fotos/{id:int}", async (int id, HttpContext context, IBodyAssessmentService service) =>
         {
-            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return Results.Unauthorized();
             var photo = await service.OpenPhotoAsync(id, userId);
             if (photo == null) return Results.NotFound();
+            context.Response.Headers.CacheControl = "private, no-store";
             return Results.File(photo.Contenido, photo.ContentType);
         }).RequireAuthorization();
     }
